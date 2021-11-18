@@ -7,11 +7,14 @@
 #include <climits>
 #include <string_view>
 
+#include <boost/container/static_vector.hpp>
+
 #include <fmt/format.h>
 
 #include "common/common_types.h"
 #include "common/div_ceil.h"
 #include "shader_recompiler/backend/spirv/emit_context.h"
+#include "shader_recompiler/backend/spirv/emit_spirv.h"
 
 namespace Shader::Backend::SPIRV {
 namespace {
@@ -430,14 +433,32 @@ Id DescType(EmitContext& ctx, Id sampled_type, Id pointer_type, u32 count) {
     }
 }
 
-size_t FindNextUnusedLocation(const std::bitset<IR::NUM_GENERICS>& used_locations,
-                              size_t start_offset) {
+size_t FindAndSetNextUnusedLocation(std::bitset<IR::NUM_GENERICS>& used_locations,
+                                    size_t& start_offset) {
     for (size_t location = start_offset; location < used_locations.size(); ++location) {
         if (!used_locations.test(location)) {
+            start_offset = location;
+            used_locations.set(location);
             return location;
         }
     }
     throw RuntimeError("Unable to get an unused location for legacy attribute");
+}
+
+Id DefineLegacyInput(EmitContext& ctx, std::bitset<IR::NUM_GENERICS>& used_locations,
+                     size_t& start_offset) {
+    const Id id{DefineInput(ctx, ctx.F32[4], true)};
+    const size_t location = FindAndSetNextUnusedLocation(used_locations, start_offset);
+    ctx.Decorate(id, spv::Decoration::Location, location);
+    return id;
+}
+
+Id DefineLegacyOutput(EmitContext& ctx, std::bitset<IR::NUM_GENERICS>& used_locations,
+                      size_t& start_offset, std::optional<u32> invocations) {
+    const Id id{DefineOutput(ctx, ctx.F32[4], invocations)};
+    const size_t location = FindAndSetNextUnusedLocation(used_locations, start_offset);
+    ctx.Decorate(id, spv::Decoration::Location, location);
+    return id;
 }
 } // Anonymous namespace
 
@@ -456,8 +477,9 @@ void VectorTypes::Define(Sirit::Module& sirit_ctx, Id base_type, std::string_vie
 
 EmitContext::EmitContext(const Profile& profile_, const RuntimeInfo& runtime_info_,
                          IR::Program& program, Bindings& bindings)
-    : Sirit::Module(profile_.supported_spirv), profile{profile_},
-      runtime_info{runtime_info_}, stage{program.stage} {
+    : Sirit::Module(profile_.supported_spirv), profile{profile_}, runtime_info{runtime_info_},
+      stage{program.stage}, texture_rescaling_index{bindings.texture_scaling_index},
+      image_rescaling_index{bindings.image_scaling_index} {
     const bool is_unified{profile.unified_descriptor_binding};
     u32& uniform_binding{is_unified ? bindings.unified : bindings.uniform_buffer};
     u32& storage_binding{is_unified ? bindings.unified : bindings.storage_buffer};
@@ -474,10 +496,11 @@ EmitContext::EmitContext(const Profile& profile_, const RuntimeInfo& runtime_inf
     DefineStorageBuffers(program.info, storage_binding);
     DefineTextureBuffers(program.info, texture_binding);
     DefineImageBuffers(program.info, image_binding);
-    DefineTextures(program.info, texture_binding);
-    DefineImages(program.info, image_binding);
+    DefineTextures(program.info, texture_binding, bindings.texture_scaling_index);
+    DefineImages(program.info, image_binding, bindings.image_scaling_index);
     DefineAttributeMemAccess(program.info);
     DefineGlobalMemoryFunctions(program.info);
+    DefineRescalingInput(program.info);
 }
 
 EmitContext::~EmitContext() = default;
@@ -518,6 +541,64 @@ Id EmitContext::BitOffset16(const IR::Value& offset) {
         return Const(((offset.U32() / 2) % 2) * 16);
     }
     return OpBitwiseAnd(U32[1], OpShiftLeftLogical(U32[1], Def(offset), Const(3u)), Const(16u));
+}
+
+Id EmitContext::InputLegacyAttribute(IR::Attribute attribute) {
+    if (attribute >= IR::Attribute::ColorFrontDiffuseR &&
+        attribute <= IR::Attribute::ColorFrontDiffuseA) {
+        return input_front_color;
+    }
+    if (attribute >= IR::Attribute::ColorFrontSpecularR &&
+        attribute <= IR::Attribute::ColorFrontSpecularA) {
+        return input_front_secondary_color;
+    }
+    if (attribute >= IR::Attribute::ColorBackDiffuseR &&
+        attribute <= IR::Attribute::ColorBackDiffuseA) {
+        return input_back_color;
+    }
+    if (attribute >= IR::Attribute::ColorBackSpecularR &&
+        attribute <= IR::Attribute::ColorBackSpecularA) {
+        return input_back_secondary_color;
+    }
+    if (attribute == IR::Attribute::FogCoordinate) {
+        return input_fog_frag_coord;
+    }
+    if (attribute >= IR::Attribute::FixedFncTexture0S &&
+        attribute <= IR::Attribute::FixedFncTexture9Q) {
+        u32 index =
+            (static_cast<u32>(attribute) - static_cast<u32>(IR::Attribute::FixedFncTexture0S)) / 4;
+        return input_fixed_fnc_textures[index];
+    }
+    throw InvalidArgument("Attribute is not legacy attribute {}", attribute);
+}
+
+Id EmitContext::OutputLegacyAttribute(IR::Attribute attribute) {
+    if (attribute >= IR::Attribute::ColorFrontDiffuseR &&
+        attribute <= IR::Attribute::ColorFrontDiffuseA) {
+        return output_front_color;
+    }
+    if (attribute >= IR::Attribute::ColorFrontSpecularR &&
+        attribute <= IR::Attribute::ColorFrontSpecularA) {
+        return output_front_secondary_color;
+    }
+    if (attribute >= IR::Attribute::ColorBackDiffuseR &&
+        attribute <= IR::Attribute::ColorBackDiffuseA) {
+        return output_back_color;
+    }
+    if (attribute >= IR::Attribute::ColorBackSpecularR &&
+        attribute <= IR::Attribute::ColorBackSpecularA) {
+        return output_back_secondary_color;
+    }
+    if (attribute == IR::Attribute::FogCoordinate) {
+        return output_fog_frag_coord;
+    }
+    if (attribute >= IR::Attribute::FixedFncTexture0S &&
+        attribute <= IR::Attribute::FixedFncTexture9Q) {
+        u32 index =
+            (static_cast<u32>(attribute) - static_cast<u32>(IR::Attribute::FixedFncTexture0S)) / 4;
+        return output_fixed_fnc_textures[index];
+    }
+    throw InvalidArgument("Attribute is not legacy attribute {}", attribute);
 }
 
 void EmitContext::DefineCommonTypes(const Info& info) {
@@ -920,6 +1001,73 @@ void EmitContext::DefineGlobalMemoryFunctions(const Info& info) {
         define(&StorageDefinitions::U32x4, storage_types.U32x4, U32[4], sizeof(u32[4]));
 }
 
+void EmitContext::DefineRescalingInput(const Info& info) {
+    if (!info.uses_rescaling_uniform) {
+        return;
+    }
+    if (profile.unified_descriptor_binding) {
+        DefineRescalingInputPushConstant();
+    } else {
+        DefineRescalingInputUniformConstant();
+    }
+}
+
+void EmitContext::DefineRescalingInputPushConstant() {
+    boost::container::static_vector<Id, 3> members{};
+    u32 member_index{0};
+
+    rescaling_textures_type = TypeArray(U32[1], Const(4u));
+    Decorate(rescaling_textures_type, spv::Decoration::ArrayStride, 4u);
+    members.push_back(rescaling_textures_type);
+    rescaling_textures_member_index = member_index++;
+
+    rescaling_images_type = TypeArray(U32[1], Const(NUM_IMAGE_SCALING_WORDS));
+    Decorate(rescaling_images_type, spv::Decoration::ArrayStride, 4u);
+    members.push_back(rescaling_images_type);
+    rescaling_images_member_index = member_index++;
+
+    if (stage != Stage::Compute) {
+        members.push_back(F32[1]);
+        rescaling_downfactor_member_index = member_index++;
+    }
+    const Id push_constant_struct{TypeStruct(std::span(members.data(), members.size()))};
+    Decorate(push_constant_struct, spv::Decoration::Block);
+    Name(push_constant_struct, "ResolutionInfo");
+
+    MemberDecorate(push_constant_struct, rescaling_textures_member_index, spv::Decoration::Offset,
+                   static_cast<u32>(offsetof(RescalingLayout, rescaling_textures)));
+    MemberName(push_constant_struct, rescaling_textures_member_index, "rescaling_textures");
+
+    MemberDecorate(push_constant_struct, rescaling_images_member_index, spv::Decoration::Offset,
+                   static_cast<u32>(offsetof(RescalingLayout, rescaling_images)));
+    MemberName(push_constant_struct, rescaling_images_member_index, "rescaling_images");
+
+    if (stage != Stage::Compute) {
+        MemberDecorate(push_constant_struct, rescaling_downfactor_member_index,
+                       spv::Decoration::Offset,
+                       static_cast<u32>(offsetof(RescalingLayout, down_factor)));
+        MemberName(push_constant_struct, rescaling_downfactor_member_index, "down_factor");
+    }
+    const Id pointer_type{TypePointer(spv::StorageClass::PushConstant, push_constant_struct)};
+    rescaling_push_constants = AddGlobalVariable(pointer_type, spv::StorageClass::PushConstant);
+    Name(rescaling_push_constants, "rescaling_push_constants");
+
+    if (profile.supported_spirv >= 0x00010400) {
+        interfaces.push_back(rescaling_push_constants);
+    }
+}
+
+void EmitContext::DefineRescalingInputUniformConstant() {
+    const Id pointer_type{TypePointer(spv::StorageClass::UniformConstant, F32[4])};
+    rescaling_uniform_constant =
+        AddGlobalVariable(pointer_type, spv::StorageClass::UniformConstant);
+    Decorate(rescaling_uniform_constant, spv::Decoration::Location, 0u);
+
+    if (profile.supported_spirv >= 0x00010400) {
+        interfaces.push_back(rescaling_uniform_constant);
+    }
+}
+
 void EmitContext::DefineConstantBuffers(const Info& info, u32& binding) {
     if (info.constant_buffer_descriptors.empty()) {
         return;
@@ -1108,7 +1256,7 @@ void EmitContext::DefineImageBuffers(const Info& info, u32& binding) {
     }
 }
 
-void EmitContext::DefineTextures(const Info& info, u32& binding) {
+void EmitContext::DefineTextures(const Info& info, u32& binding, u32& scaling_index) {
     textures.reserve(info.texture_descriptors.size());
     for (const TextureDescriptor& desc : info.texture_descriptors) {
         const Id image_type{ImageType(*this, desc)};
@@ -1130,13 +1278,14 @@ void EmitContext::DefineTextures(const Info& info, u32& binding) {
             interfaces.push_back(id);
         }
         ++binding;
+        ++scaling_index;
     }
     if (info.uses_atomic_image_u32) {
         image_u32 = TypePointer(spv::StorageClass::Image, U32[1]);
     }
 }
 
-void EmitContext::DefineImages(const Info& info, u32& binding) {
+void EmitContext::DefineImages(const Info& info, u32& binding, u32& scaling_index) {
     images.reserve(info.image_descriptors.size());
     for (const ImageDescriptor& desc : info.image_descriptors) {
         if (desc.count != 1) {
@@ -1157,6 +1306,7 @@ void EmitContext::DefineImages(const Info& info, u32& binding) {
             interfaces.push_back(id);
         }
         ++binding;
+        ++scaling_index;
     }
 }
 
@@ -1279,22 +1429,26 @@ void EmitContext::DefineInputs(const IR::Program& program) {
     }
     size_t previous_unused_location = 0;
     if (loads.AnyComponent(IR::Attribute::ColorFrontDiffuseR)) {
-        const size_t location = FindNextUnusedLocation(used_locations, previous_unused_location);
-        previous_unused_location = location;
-        used_locations.set(location);
-        const Id id{DefineInput(*this, F32[4], true)};
-        Decorate(id, spv::Decoration::Location, location);
-        input_front_color = id;
+        input_front_color = DefineLegacyInput(*this, used_locations, previous_unused_location);
+    }
+    if (loads.AnyComponent(IR::Attribute::ColorFrontSpecularR)) {
+        input_front_secondary_color =
+            DefineLegacyInput(*this, used_locations, previous_unused_location);
+    }
+    if (loads.AnyComponent(IR::Attribute::ColorBackDiffuseR)) {
+        input_back_color = DefineLegacyInput(*this, used_locations, previous_unused_location);
+    }
+    if (loads.AnyComponent(IR::Attribute::ColorBackSpecularR)) {
+        input_back_secondary_color =
+            DefineLegacyInput(*this, used_locations, previous_unused_location);
+    }
+    if (loads.AnyComponent(IR::Attribute::FogCoordinate)) {
+        input_fog_frag_coord = DefineLegacyInput(*this, used_locations, previous_unused_location);
     }
     for (size_t index = 0; index < NUM_FIXEDFNCTEXTURE; ++index) {
         if (loads.AnyComponent(IR::Attribute::FixedFncTexture0S + index * 4)) {
-            const size_t location =
-                FindNextUnusedLocation(used_locations, previous_unused_location);
-            previous_unused_location = location;
-            used_locations.set(location);
-            const Id id{DefineInput(*this, F32[4], true)};
-            Decorate(id, spv::Decoration::Location, location);
-            input_fixed_fnc_textures[index] = id;
+            input_fixed_fnc_textures[index] =
+                DefineLegacyInput(*this, used_locations, previous_unused_location);
         }
     }
     if (stage == Stage::TessellationEval) {
@@ -1356,22 +1510,29 @@ void EmitContext::DefineOutputs(const IR::Program& program) {
     }
     size_t previous_unused_location = 0;
     if (info.stores.AnyComponent(IR::Attribute::ColorFrontDiffuseR)) {
-        const size_t location = FindNextUnusedLocation(used_locations, previous_unused_location);
-        previous_unused_location = location;
-        used_locations.set(location);
-        const Id id{DefineOutput(*this, F32[4], invocations)};
-        Decorate(id, spv::Decoration::Location, static_cast<u32>(location));
-        output_front_color = id;
+        output_front_color =
+            DefineLegacyOutput(*this, used_locations, previous_unused_location, invocations);
+    }
+    if (info.stores.AnyComponent(IR::Attribute::ColorFrontSpecularR)) {
+        output_front_secondary_color =
+            DefineLegacyOutput(*this, used_locations, previous_unused_location, invocations);
+    }
+    if (info.stores.AnyComponent(IR::Attribute::ColorBackDiffuseR)) {
+        output_back_color =
+            DefineLegacyOutput(*this, used_locations, previous_unused_location, invocations);
+    }
+    if (info.stores.AnyComponent(IR::Attribute::ColorBackSpecularR)) {
+        output_back_secondary_color =
+            DefineLegacyOutput(*this, used_locations, previous_unused_location, invocations);
+    }
+    if (info.stores.AnyComponent(IR::Attribute::FogCoordinate)) {
+        output_fog_frag_coord =
+            DefineLegacyOutput(*this, used_locations, previous_unused_location, invocations);
     }
     for (size_t index = 0; index < NUM_FIXEDFNCTEXTURE; ++index) {
         if (info.stores.AnyComponent(IR::Attribute::FixedFncTexture0S + index * 4)) {
-            const size_t location =
-                FindNextUnusedLocation(used_locations, previous_unused_location);
-            previous_unused_location = location;
-            used_locations.set(location);
-            const Id id{DefineOutput(*this, F32[4], invocations)};
-            Decorate(id, spv::Decoration::Location, location);
-            output_fixed_fnc_textures[index] = id;
+            output_fixed_fnc_textures[index] =
+                DefineLegacyOutput(*this, used_locations, previous_unused_location, invocations);
         }
     }
     switch (stage) {

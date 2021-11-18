@@ -113,6 +113,9 @@ public:
     [[nodiscard]] Id BitOffset8(const IR::Value& offset);
     [[nodiscard]] Id BitOffset16(const IR::Value& offset);
 
+    Id InputLegacyAttribute(IR::Attribute attribute);
+    Id OutputLegacyAttribute(IR::Attribute attribute);
+
     Id Const(u32 value) {
         return Constant(U32[1], value);
     }
@@ -235,6 +238,16 @@ public:
     Id indexed_load_func{};
     Id indexed_store_func{};
 
+    Id rescaling_uniform_constant{};
+    Id rescaling_push_constants{};
+    Id rescaling_textures_type{};
+    Id rescaling_images_type{};
+    u32 rescaling_textures_member_index{};
+    u32 rescaling_images_member_index{};
+    u32 rescaling_downfactor_member_index{};
+    u32 texture_rescaling_index{};
+    u32 image_rescaling_index{};
+
     Id local_memory{};
 
     Id shared_memory_u8{};
@@ -269,12 +282,20 @@ public:
 
     Id input_position{};
     Id input_front_color{};
+    Id input_front_secondary_color{};
+    Id input_back_color{};
+    Id input_back_secondary_color{};
+    Id input_fog_frag_coord{};
     std::array<Id, 10> input_fixed_fnc_textures{};
     std::array<Id, 32> input_generics{};
 
     Id output_point_size{};
     Id output_position{};
     Id output_front_color{};
+    Id output_front_secondary_color{};
+    Id output_back_color{};
+    Id output_back_secondary_color{};
+    Id output_fog_frag_coord{};
     std::array<Id, 10> output_fixed_fnc_textures{};
     std::array<std::array<GenericElementInfo, 4>, 32> output_generics{};
 
@@ -299,10 +320,13 @@ private:
     void DefineStorageBuffers(const Info& info, u32& binding);
     void DefineTextureBuffers(const Info& info, u32& binding);
     void DefineImageBuffers(const Info& info, u32& binding);
-    void DefineTextures(const Info& info, u32& binding);
-    void DefineImages(const Info& info, u32& binding);
+    void DefineTextures(const Info& info, u32& binding, u32& scaling_index);
+    void DefineImages(const Info& info, u32& binding, u32& scaling_index);
     void DefineAttributeMemAccess(const Info& info);
     void DefineGlobalMemoryFunctions(const Info& info);
+    void DefineRescalingInput(const Info& info);
+    void DefineRescalingInputPushConstant();
+    void DefineRescalingInputUniformConstant();
 
     void DefineInputs(const IR::Program& program);
     void DefineOutputs(const IR::Program& program);
