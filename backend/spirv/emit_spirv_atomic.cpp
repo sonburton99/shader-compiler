@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
+#include <bit>
 #include "emit_spirv.h"
 #include "emit_spirv_instructions.h"
 

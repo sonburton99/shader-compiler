@@ -5,6 +5,7 @@
 #include <array>
 #include <climits>
 #include <string_view>
+#include <bit>
 
 #include <boost/container/static_vector.hpp>
 
