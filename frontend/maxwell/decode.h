@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "common/common_types.h"
-#include "shader_recompiler/frontend/maxwell/opcodes.h"
+#include <common/common_types.h>
+#include "opcodes.h"
 
 namespace Shader::Maxwell {
 

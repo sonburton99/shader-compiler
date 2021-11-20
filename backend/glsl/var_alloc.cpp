@@ -6,9 +6,9 @@
 
 #include <fmt/format.h>
 
-#include "shader_recompiler/backend/glsl/var_alloc.h"
-#include "shader_recompiler/exception.h"
-#include "shader_recompiler/frontend/ir/value.h"
+#include "var_alloc.h"
+#include <exception.h>
+#include <frontend/ir/value.h>
 
 namespace Shader::Backend::GLSL {
 namespace {

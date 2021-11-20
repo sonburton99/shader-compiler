@@ -6,11 +6,11 @@
 #include <array>
 #include <string>
 
-#include "shader_recompiler/frontend/ir/abstract_syntax_list.h"
-#include "shader_recompiler/frontend/ir/basic_block.h"
-#include "shader_recompiler/program_header.h"
-#include "shader_recompiler/shader_info.h"
-#include "shader_recompiler/stage.h"
+#include "abstract_syntax_list.h"
+#include "basic_block.h"
+#include <program_header.h>
+#include <shader_info.h>
+#include <stage.h>
 
 namespace Shader::IR {
 

@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "common/common_types.h"
-#include "shader_recompiler/varying_state.h"
+#include "varying_state.h"
 
 namespace Shader {
 

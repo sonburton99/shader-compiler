@@ -6,8 +6,8 @@
 #include <boost/container/flat_set.hpp>
 #include <boost/container/small_vector.hpp>
 
-#include "shader_recompiler/frontend/ir/basic_block.h"
-#include "shader_recompiler/frontend/ir/post_order.h"
+#include "basic_block.h"
+#include "post_order.h"
 
 namespace Shader::IR {
 

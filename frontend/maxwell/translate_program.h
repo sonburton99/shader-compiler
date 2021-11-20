@@ -3,12 +3,12 @@
 
 #pragma once
 
-#include "shader_recompiler/environment.h"
-#include "shader_recompiler/frontend/ir/basic_block.h"
-#include "shader_recompiler/frontend/ir/program.h"
-#include "shader_recompiler/frontend/maxwell/control_flow.h"
-#include "shader_recompiler/host_translate_info.h"
-#include "shader_recompiler/object_pool.h"
+#include <environment.h>
+#include <frontend/ir/basic_block.h>
+#include <frontend/ir/program.h>
+#include "control_flow.h"
+#include <host_translate_info.h>
+#include <object_pool.h>
 
 namespace Shader::Maxwell {
 

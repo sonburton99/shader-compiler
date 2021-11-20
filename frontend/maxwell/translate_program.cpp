@@ -5,15 +5,15 @@
 #include <memory>
 #include <vector>
 
-#include "common/settings.h"
-#include "shader_recompiler/exception.h"
-#include "shader_recompiler/frontend/ir/basic_block.h"
-#include "shader_recompiler/frontend/ir/post_order.h"
-#include "shader_recompiler/frontend/maxwell/structured_control_flow.h"
-#include "shader_recompiler/frontend/maxwell/translate/translate.h"
-#include "shader_recompiler/frontend/maxwell/translate_program.h"
-#include "shader_recompiler/host_translate_info.h"
-#include "shader_recompiler/ir_opt/passes.h"
+#include <common/settings.h>
+#include <exception.h>
+#include <frontend/ir/basic_block.h>
+#include <frontend/ir/post_order.h>
+#include "structured_control_flow.h"
+#include "translate/translate.h"
+#include "translate_program.h"
+#include <host_translate_info.h>
+#include <ir_opt/passes.h>
 
 namespace Shader::Maxwell {
 namespace {

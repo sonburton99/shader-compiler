@@ -5,7 +5,7 @@
 
 #include <fmt/format.h>
 
-#include "shader_recompiler/frontend/ir/condition.h"
+#include "condition.h"
 
 namespace Shader::IR {
 

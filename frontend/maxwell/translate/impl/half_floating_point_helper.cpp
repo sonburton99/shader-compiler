@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
-#include "shader_recompiler/frontend/maxwell/translate/impl/half_floating_point_helper.h"
+#include "half_floating_point_helper.h"
 
 namespace Shader::Maxwell {
 

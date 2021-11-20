@@ -3,7 +3,7 @@
 
 #include <string_view>
 
-#include "shader_recompiler/frontend/ir/opcodes.h"
+#include "opcodes.h"
 
 namespace Shader::IR {
 

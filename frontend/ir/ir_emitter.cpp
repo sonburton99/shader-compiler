@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
-#include "common/bit_cast.h"
-#include "shader_recompiler/frontend/ir/ir_emitter.h"
-#include "shader_recompiler/frontend/ir/value.h"
+#include <common/bit_cast.h>
+#include "ir_emitter.h"
+#include "value.h"
 
 namespace Shader::IR {
 namespace {

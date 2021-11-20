@@ -8,9 +8,9 @@
 
 #include <fmt/format.h>
 
-#include "common/common_types.h"
-#include "shader_recompiler/frontend/ir/flow_test.h"
-#include "shader_recompiler/frontend/ir/pred.h"
+#include <common/common_types.h>
+#include "flow_test.h"
+#include "pred.h"
 
 namespace Shader::IR {
 

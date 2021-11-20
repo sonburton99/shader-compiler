@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "shader_recompiler/environment.h"
-#include "shader_recompiler/frontend/ir/basic_block.h"
+#include <environment.h>
+#include <frontend/ir/basic_block.h>
 
 namespace Shader::Maxwell {
 

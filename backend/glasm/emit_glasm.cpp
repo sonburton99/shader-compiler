@@ -5,16 +5,16 @@
 #include <string>
 #include <tuple>
 
-#include "common/div_ceil.h"
-#include "common/settings.h"
-#include "shader_recompiler/backend/bindings.h"
-#include "shader_recompiler/backend/glasm/emit_context.h"
-#include "shader_recompiler/backend/glasm/emit_glasm.h"
-#include "shader_recompiler/backend/glasm/emit_glasm_instructions.h"
-#include "shader_recompiler/frontend/ir/ir_emitter.h"
-#include "shader_recompiler/frontend/ir/program.h"
-#include "shader_recompiler/profile.h"
-#include "shader_recompiler/runtime_info.h"
+#include <common/div_ceil.h>
+#include <common/settings.h>
+#include <backend/bindings.h>
+#include "emit_context.h"
+#include "emit_glasm.h"
+#include "emit_glasm_instructions.h"
+#include <frontend/ir/ir_emitter.h>
+#include <frontend/ir/program.h>
+#include <profile.h>
+#include <runtime_info.h>
 
 namespace Shader::Backend::GLASM {
 namespace {
@@ -164,7 +164,7 @@ void EmitInst(EmitContext& ctx, IR::Inst* inst) {
 #define OPCODE(name, result_type, ...)                                                             \
     case IR::Opcode::name:                                                                         \
         return Invoke<&Emit##name>(ctx, inst);
-#include "shader_recompiler/frontend/ir/opcodes.inc"
+#include <frontend/ir/opcodes.inc>
 #undef OPCODE
     }
     throw LogicError("Invalid opcode {}", inst->GetOpcode());

@@ -5,9 +5,9 @@
 
 #include <span>
 
-#include "shader_recompiler/environment.h"
-#include "shader_recompiler/frontend/ir/basic_block.h"
-#include "shader_recompiler/frontend/ir/program.h"
+#include <environment.h>
+#include <frontend/ir/basic_block.h>
+#include <frontend/ir/program.h>
 
 namespace Shader::Optimization {
 

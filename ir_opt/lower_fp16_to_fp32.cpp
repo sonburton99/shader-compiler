@@ -3,9 +3,9 @@
 
 #include <algorithm>
 
-#include "shader_recompiler/frontend/ir/ir_emitter.h"
-#include "shader_recompiler/frontend/ir/value.h"
-#include "shader_recompiler/ir_opt/passes.h"
+#include <frontend/ir/ir_emitter.h>
+#include <frontend/ir/value.h>
+#include "passes.h"
 
 namespace Shader::Optimization {
 namespace {

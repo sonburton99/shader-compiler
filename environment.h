@@ -3,9 +3,9 @@
 #include <array>
 
 #include "common/common_types.h"
-#include "shader_recompiler/program_header.h"
-#include "shader_recompiler/shader_info.h"
-#include "shader_recompiler/stage.h"
+#include "program_header.h"
+#include "shader_info.h"
+#include "stage.h"
 
 namespace Shader {
 

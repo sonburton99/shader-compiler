@@ -8,8 +8,8 @@
 
 #include <fmt/format.h>
 
-#include "common/common_types.h"
-#include "shader_recompiler/exception.h"
+#include <common/common_types.h>
+#include <exception.h>
 
 namespace Shader::Maxwell {
 

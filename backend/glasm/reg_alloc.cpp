@@ -5,10 +5,10 @@
 
 #include <fmt/format.h>
 
-#include "shader_recompiler/backend/glasm/emit_context.h"
-#include "shader_recompiler/backend/glasm/reg_alloc.h"
-#include "shader_recompiler/exception.h"
-#include "shader_recompiler/frontend/ir/value.h"
+#include "emit_context.h"
+#include "reg_alloc.h"
+#include <exception.h>
+#include <frontend/ir/value.h>
 
 namespace Shader::Backend::GLASM {
 

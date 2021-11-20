@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
-#include "common/bit_field.h"
-#include "common/common_types.h"
-#include "shader_recompiler/frontend/maxwell/translate/impl/common_funcs.h"
-#include "shader_recompiler/frontend/maxwell/translate/impl/impl.h"
+#include <common/bit_field.h>
+#include <common/common_types.h>
+#include "common_funcs.h"
+#include "impl.h"
 
 namespace Shader::Maxwell {
 namespace {

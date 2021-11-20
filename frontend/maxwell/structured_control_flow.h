@@ -3,12 +3,12 @@
 
 #pragma once
 
-#include "shader_recompiler/environment.h"
-#include "shader_recompiler/frontend/ir/abstract_syntax_list.h"
-#include "shader_recompiler/frontend/ir/basic_block.h"
-#include "shader_recompiler/frontend/ir/value.h"
-#include "shader_recompiler/frontend/maxwell/control_flow.h"
-#include "shader_recompiler/object_pool.h"
+#include <environment.h>
+#include <frontend/ir/abstract_syntax_list.h>
+#include <frontend/ir/basic_block.h>
+#include <frontend/ir/value.h>
+#include "control_flow.h"
+#include <object_pool.h>
 
 namespace Shader {
 struct HostTranslateInfo;

@@ -13,17 +13,17 @@
 #include <boost/container/small_vector.hpp>
 #include <boost/intrusive/list.hpp>
 
-#include "common/assert.h"
-#include "common/bit_cast.h"
-#include "common/common_types.h"
-#include "shader_recompiler/exception.h"
-#include "shader_recompiler/frontend/ir/attribute.h"
-#include "shader_recompiler/frontend/ir/opcodes.h"
-#include "shader_recompiler/frontend/ir/patch.h"
-#include "shader_recompiler/frontend/ir/pred.h"
-#include "shader_recompiler/frontend/ir/reg.h"
-#include "shader_recompiler/frontend/ir/type.h"
-#include "shader_recompiler/frontend/ir/value.h"
+#include <common/assert.h>
+#include <common/bit_cast.h>
+#include <common/common_types.h>
+#include <exception.h>
+#include "attribute.h"
+#include "opcodes.h"
+#include "patch.h"
+#include "pred.h"
+#include "reg.h"
+#include "type.h"
+#include "value.h"
 
 namespace Shader::IR {
 

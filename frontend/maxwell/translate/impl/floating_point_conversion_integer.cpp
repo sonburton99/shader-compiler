@@ -3,10 +3,10 @@
 
 #include <limits>
 
-#include "common/common_types.h"
-#include "shader_recompiler/exception.h"
-#include "shader_recompiler/frontend/maxwell/opcodes.h"
-#include "shader_recompiler/frontend/maxwell/translate/impl/impl.h"
+#include <common/common_types.h>
+#include <exception.h>
+#include <frontend/maxwell/opcodes.h>
+#include "impl.h"
 
 namespace Shader::Maxwell {
 namespace {

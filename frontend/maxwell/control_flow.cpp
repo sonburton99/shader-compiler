@@ -9,11 +9,11 @@
 
 #include <fmt/format.h>
 
-#include "shader_recompiler/exception.h"
-#include "shader_recompiler/frontend/maxwell/control_flow.h"
-#include "shader_recompiler/frontend/maxwell/decode.h"
-#include "shader_recompiler/frontend/maxwell/indirect_branch_table_track.h"
-#include "shader_recompiler/frontend/maxwell/location.h"
+#include <exception.h>
+#include "control_flow.h"
+#include "decode.h"
+#include "indirect_branch_table_track.h"
+#include "location.h"
 
 namespace Shader::Maxwell::Flow {
 namespace {

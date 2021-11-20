@@ -7,8 +7,8 @@
 #include <bitset>
 
 #include "common/common_types.h"
-#include "shader_recompiler/frontend/ir/type.h"
-#include "shader_recompiler/varying_state.h"
+#include "frontend/ir/type.h"
+#include "varying_state.h"
 
 #include <boost/container/small_vector.hpp>
 #include <boost/container/static_vector.hpp>

@@ -3,12 +3,12 @@
 
 #include <utility>
 
-#include "shader_recompiler/exception.h"
-#include "shader_recompiler/frontend/ir/basic_block.h"
-#include "shader_recompiler/frontend/ir/ir_emitter.h"
-#include "shader_recompiler/frontend/ir/program.h"
-#include "shader_recompiler/frontend/ir/value.h"
-#include "shader_recompiler/ir_opt/passes.h"
+#include <exception.h>
+#include <frontend/ir/basic_block.h>
+#include <frontend/ir/ir_emitter.h>
+#include <frontend/ir/program.h>
+#include <frontend/ir/value.h>
+#include "passes.h"
 
 namespace Shader::Optimization {
 namespace {

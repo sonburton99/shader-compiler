@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
-#include "shader_recompiler/backend/spirv/emit_spirv.h"
-#include "shader_recompiler/backend/spirv/emit_spirv_instructions.h"
-#include "shader_recompiler/frontend/ir/modifiers.h"
+#include "emit_spirv.h"
+#include "emit_spirv_instructions.h"
+#include <frontend/ir/modifiers.h>
 
 namespace Shader::Backend::SPIRV {
 

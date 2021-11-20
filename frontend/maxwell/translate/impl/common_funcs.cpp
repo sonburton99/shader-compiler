@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
-#include "shader_recompiler/frontend/maxwell/translate/impl/common_funcs.h"
+#include "common_funcs.h"
 
 namespace Shader::Maxwell {
 IR::U1 IntegerCompare(IR::IREmitter& ir, const IR::U32& operand_1, const IR::U32& operand_2,

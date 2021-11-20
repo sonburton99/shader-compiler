@@ -9,8 +9,8 @@
 
 #include <fmt/format.h>
 
-#include "shader_recompiler/backend/glsl/var_alloc.h"
-#include "shader_recompiler/stage.h"
+#include "var_alloc.h"
+#include <stage.h>
 
 namespace Shader {
 struct Info;

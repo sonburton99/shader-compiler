@@ -4,10 +4,10 @@
 #include <map>
 #include <set>
 
-#include "shader_recompiler/exception.h"
-#include "shader_recompiler/frontend/ir/basic_block.h"
-#include "shader_recompiler/frontend/ir/value.h"
-#include "shader_recompiler/ir_opt/passes.h"
+#include <exception.h>
+#include <frontend/ir/basic_block.h>
+#include <frontend/ir/value.h>
+#include "passes.h"
 
 namespace Shader::Optimization {
 

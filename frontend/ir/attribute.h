@@ -5,7 +5,7 @@
 
 #include <fmt/format.h>
 
-#include "common/common_types.h"
+#include <common/common_types.h>
 
 namespace Shader::IR {
 

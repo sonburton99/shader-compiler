@@ -3,8 +3,8 @@
 
 #include <fmt/format.h>
 
-#include "shader_recompiler/exception.h"
-#include "shader_recompiler/frontend/ir/attribute.h"
+#include <exception.h>
+#include "attribute.h"
 
 namespace Shader::IR {
 

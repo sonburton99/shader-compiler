@@ -3,8 +3,8 @@
 
 #include <string_view>
 
-#include "shader_recompiler/backend/glsl/emit_context.h"
-#include "shader_recompiler/backend/glsl/emit_glsl_instructions.h"
+#include "emit_context.h"
+#include "emit_glsl_instructions.h"
 
 namespace Shader::Backend::GLSL {
 

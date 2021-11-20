@@ -3,11 +3,11 @@
 
 #include <string_view>
 
-#include "shader_recompiler/backend/glsl/emit_context.h"
-#include "shader_recompiler/backend/glsl/emit_glsl_instructions.h"
-#include "shader_recompiler/frontend/ir/value.h"
-#include "shader_recompiler/profile.h"
-#include "shader_recompiler/runtime_info.h"
+#include "emit_context.h"
+#include "emit_glsl_instructions.h"
+#include <frontend/ir/value.h>
+#include <profile.h>
+#include <runtime_info.h>
 
 namespace Shader::Backend::GLSL {
 namespace {

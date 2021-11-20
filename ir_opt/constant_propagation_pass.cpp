@@ -6,12 +6,12 @@
 #include <tuple>
 #include <type_traits>
 
-#include "common/bit_cast.h"
-#include "common/bit_util.h"
-#include "shader_recompiler/exception.h"
-#include "shader_recompiler/frontend/ir/ir_emitter.h"
-#include "shader_recompiler/frontend/ir/value.h"
-#include "shader_recompiler/ir_opt/passes.h"
+#include <common/bit_cast.h>
+#include <common/bit_util.h>
+#include <exception.h>
+#include <frontend/ir/ir_emitter.h>
+#include <frontend/ir/value.h>
+#include "passes.h"
 
 namespace Shader::Optimization {
 namespace {

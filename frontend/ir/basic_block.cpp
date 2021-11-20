@@ -6,10 +6,10 @@
 #include <map>
 #include <memory>
 
-#include "common/bit_cast.h"
-#include "common/common_types.h"
-#include "shader_recompiler/frontend/ir/basic_block.h"
-#include "shader_recompiler/frontend/ir/value.h"
+#include <common/bit_cast.h>
+#include <common/common_types.h>
+#include "basic_block.h"
+#include "value.h"
 
 namespace Shader::IR {
 

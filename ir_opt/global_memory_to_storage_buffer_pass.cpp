@@ -9,12 +9,12 @@
 #include <boost/container/flat_set.hpp>
 #include <boost/container/small_vector.hpp>
 
-#include "common/alignment.h"
-#include "shader_recompiler/frontend/ir/basic_block.h"
-#include "shader_recompiler/frontend/ir/breadth_first_search.h"
-#include "shader_recompiler/frontend/ir/ir_emitter.h"
-#include "shader_recompiler/frontend/ir/value.h"
-#include "shader_recompiler/ir_opt/passes.h"
+#include <common/alignment.h>
+#include <frontend/ir/basic_block.h>
+#include <frontend/ir/breadth_first_search.h>
+#include <frontend/ir/ir_emitter.h>
+#include <frontend/ir/value.h>
+#include "passes.h"
 
 namespace Shader::Optimization {
 namespace {

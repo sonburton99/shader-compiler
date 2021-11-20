@@ -9,7 +9,7 @@
 
 #include <fmt/format.h>
 
-#include "shader_recompiler/frontend/ir/type.h"
+#include "type.h"
 
 namespace Shader::IR {
 

@@ -8,11 +8,11 @@
 
 #include <sirit/sirit.h>
 
-#include "shader_recompiler/backend/bindings.h"
-#include "shader_recompiler/frontend/ir/program.h"
-#include "shader_recompiler/profile.h"
-#include "shader_recompiler/runtime_info.h"
-#include "shader_recompiler/shader_info.h"
+#include <backend/bindings.h>
+#include <frontend/ir/program.h>
+#include <profile.h>
+#include <runtime_info.h>
+#include <shader_info.h>
 
 namespace Shader::Backend::SPIRV {
 

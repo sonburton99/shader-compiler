@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
-#include "shader_recompiler/backend/glasm/emit_context.h"
-#include "shader_recompiler/backend/glasm/emit_glasm_instructions.h"
-#include "shader_recompiler/frontend/ir/value.h"
+#include "emit_context.h"
+#include "emit_glasm_instructions.h"
+#include <frontend/ir/value.h>
 
 namespace Shader::Backend::GLASM {
 

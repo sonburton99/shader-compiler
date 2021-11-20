@@ -9,7 +9,7 @@
 
 #include <boost/container/small_vector.hpp>
 
-#include "shader_recompiler/frontend/ir/value.h"
+#include "value.h"
 
 namespace Shader::IR {
 

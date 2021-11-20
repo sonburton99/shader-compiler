@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include "common/bit_field.h"
-#include "common/common_types.h"
-#include "shader_recompiler/shader_info.h"
+#include <common/bit_field.h>
+#include <common/common_types.h>
+#include <shader_info.h>
 
 namespace Shader::IR {
 

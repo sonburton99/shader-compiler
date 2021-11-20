@@ -3,9 +3,9 @@
 
 #include <optional>
 
-#include "common/bit_field.h"
-#include "common/common_types.h"
-#include "shader_recompiler/frontend/maxwell/translate/impl/impl.h"
+#include <common/bit_field.h>
+#include <common/common_types.h>
+#include "impl.h"
 
 namespace Shader::Maxwell {
 namespace {

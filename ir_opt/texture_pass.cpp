@@ -7,12 +7,12 @@
 
 #include <boost/container/small_vector.hpp>
 
-#include "shader_recompiler/environment.h"
-#include "shader_recompiler/frontend/ir/basic_block.h"
-#include "shader_recompiler/frontend/ir/breadth_first_search.h"
-#include "shader_recompiler/frontend/ir/ir_emitter.h"
-#include "shader_recompiler/ir_opt/passes.h"
-#include "shader_recompiler/shader_info.h"
+#include <environment.h>
+#include <frontend/ir/basic_block.h>
+#include <frontend/ir/breadth_first_search.h>
+#include <frontend/ir/ir_emitter.h>
+#include "passes.h"
+#include <shader_info.h>
 
 namespace Shader::Optimization {
 namespace {

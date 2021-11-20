@@ -13,14 +13,14 @@
 
 #include <boost/intrusive/list.hpp>
 
-#include "shader_recompiler/environment.h"
-#include "shader_recompiler/frontend/ir/basic_block.h"
-#include "shader_recompiler/frontend/ir/ir_emitter.h"
-#include "shader_recompiler/frontend/maxwell/decode.h"
-#include "shader_recompiler/frontend/maxwell/structured_control_flow.h"
-#include "shader_recompiler/frontend/maxwell/translate/translate.h"
-#include "shader_recompiler/host_translate_info.h"
-#include "shader_recompiler/object_pool.h"
+#include <environment.h>
+#include <frontend/ir/basic_block.h>
+#include <frontend/ir/ir_emitter.h>
+#include "decode.h"
+#include "structured_control_flow.h"
+#include "translate/translate.h"
+#include <host_translate_info.h>
+#include <object_pool.h>
 
 namespace Shader::Maxwell {
 namespace {

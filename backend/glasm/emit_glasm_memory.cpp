@@ -3,11 +3,11 @@
 
 #include <string_view>
 
-#include "shader_recompiler/backend/glasm/emit_context.h"
-#include "shader_recompiler/backend/glasm/emit_glasm_instructions.h"
-#include "shader_recompiler/frontend/ir/program.h"
-#include "shader_recompiler/frontend/ir/value.h"
-#include "shader_recompiler/runtime_info.h"
+#include "emit_context.h"
+#include "emit_glasm_instructions.h"
+#include <frontend/ir/program.h>
+#include <frontend/ir/value.h>
+#include <runtime_info.h>
 
 namespace Shader::Backend::GLASM {
 namespace {

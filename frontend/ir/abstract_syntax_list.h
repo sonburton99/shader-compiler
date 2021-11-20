@@ -5,7 +5,7 @@
 
 #include <vector>
 
-#include "shader_recompiler/frontend/ir/value.h"
+#include "value.h"
 
 namespace Shader::IR {
 
