@@ -265,5 +265,3 @@ else()
         $<$<CXX_COMPILER_ID:Clang>:-fbracket-depth=1024>
     )
 endif()
-
-create_target_directory_groups(shader_recompiler)
