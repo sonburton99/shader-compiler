@@ -7,6 +7,8 @@
 #include <array>
 #include <string_view>
 
+#include <range/v3/algorithm.hpp>
+
 #include <fmt/format.h>
 
 #include "type.h"
@@ -67,7 +69,7 @@ constexpr OpcodeMeta META_TABLE[]{
 constexpr size_t CalculateNumArgsOf(Opcode op) {
     const auto& arg_types{META_TABLE[static_cast<size_t>(op)].arg_types};
     return static_cast<size_t>(
-        std::distance(arg_types.begin(), std::ranges::find(arg_types, Type::Void)));
+        std::distance(arg_types.begin(), ranges::find(arg_types, Type::Void)));
 }
 
 constexpr u8 NUM_ARGS[]{

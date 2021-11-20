@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
+#include <range/v3/algorithm.hpp>
+
 #include <common/alignment.h>
 #include <environment.h>
 #include <frontend/ir/modifiers.h>
@@ -21,7 +23,7 @@ void AddConstantBufferDescriptor(Info& info, u32 index, u32 count) {
     info.constant_buffer_mask |= 1U << index;
 
     auto& cbufs{info.constant_buffer_descriptors};
-    cbufs.insert(std::ranges::lower_bound(cbufs, index, {}, &ConstantBufferDescriptor::index),
+    cbufs.insert(ranges::lower_bound(cbufs, index, {}, &ConstantBufferDescriptor::index),
                  ConstantBufferDescriptor{
                      .index = index,
                      .count = 1,

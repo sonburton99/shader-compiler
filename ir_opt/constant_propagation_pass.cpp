@@ -6,6 +6,8 @@
 #include <tuple>
 #include <type_traits>
 
+#include <range/v3/algorithm.hpp>
+
 #include <common/bit_cast.h>
 #include <common/bit_util.h>
 #include <exception.h>
@@ -105,7 +107,7 @@ bool AreEqual(const Range& range) {
         }
         return false;
     }};
-    return std::ranges::adjacent_find(range, std::not_fn(equal), resolver) == std::end(range);
+    return ranges::adjacent_find(range, std::not_fn(equal), resolver) == std::end(range);
 }
 
 void FoldGetRegister(IR::Inst& inst) {

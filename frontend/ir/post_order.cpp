@@ -6,6 +6,8 @@
 #include <boost/container/flat_set.hpp>
 #include <boost/container/small_vector.hpp>
 
+#include <range/v3/algorithm.hpp>
+
 #include "basic_block.h"
 #include "post_order.h"
 
@@ -35,7 +37,7 @@ BlockList PostOrder(const AbstractSyntaxNode& root) {
             return true;
         }};
         block_stack.pop_back();
-        if (std::ranges::none_of(block->ImmSuccessors(), visit)) {
+        if (ranges::none_of(block->ImmSuccessors(), visit)) {
             post_order_blocks.push_back(block);
         }
     }

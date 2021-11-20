@@ -5,6 +5,8 @@
 #include <memory>
 #include <vector>
 
+#include <range/v3/algorithm.hpp>
+
 #include <common/settings.h>
 #include <exception.h>
 #include <frontend/ir/basic_block.h>
@@ -113,7 +115,7 @@ void AddNVNStorageBuffers(IR::Program& program) {
             continue;
         }
         const u32 offset{base + index * descriptor_size};
-        const auto it{std::ranges::find(descs, offset, &StorageBufferDescriptor::cbuf_offset)};
+        const auto it{ranges::find(descs, offset, &StorageBufferDescriptor::cbuf_offset)};
         if (it != descs.end()) {
             it->is_written |= program.info.stores_global_memory;
             continue;

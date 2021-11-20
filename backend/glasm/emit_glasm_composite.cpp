@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
+#include <range/v3/algorithm.hpp>
+
 #include "emit_context.h"
 #include "emit_glasm_instructions.h"
 #include <frontend/ir/value.h>
@@ -10,7 +12,7 @@ namespace {
 template <auto read_imm, char type, typename... Values>
 void CompositeConstruct(EmitContext& ctx, IR::Inst& inst, Values&&... elements) {
     const Register ret{ctx.reg_alloc.Define(inst)};
-    if (std::ranges::any_of(std::array{elements...},
+    if (ranges::any_of(std::array{elements...},
                             [](const IR::Value& value) { return value.IsImmediate(); })) {
         using Type = std::invoke_result_t<decltype(read_imm), IR::Value>;
         const std::array<Type, 4> values{(elements.IsImmediate() ? (elements.*read_imm)() : 0)...};

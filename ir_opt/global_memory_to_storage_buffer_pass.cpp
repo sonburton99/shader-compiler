@@ -9,6 +9,8 @@
 #include <boost/container/flat_set.hpp>
 #include <boost/container/small_vector.hpp>
 
+#include <range/v3/algorithm.hpp>
+
 #include <common/alignment.h>
 #include <frontend/ir/basic_block.h>
 #include <frontend/ir/breadth_first_search.h>
@@ -499,7 +501,7 @@ void GlobalMemoryToStorageBufferPass(IR::Program& program) {
 template <typename Descriptors, typename Descriptor, typename Func>
 static u32 Add(Descriptors& descriptors, const Descriptor& desc, Func&& pred) {
     // TODO: Handle arrays
-    const auto it{std::ranges::find_if(descriptors, pred)};
+    const auto it{ranges::find_if(descriptors, pred)};
     if (it != descriptors.end()) {
         return static_cast<u32>(std::distance(descriptors.begin(), it));
     }
@@ -510,7 +512,7 @@ static u32 Add(Descriptors& descriptors, const Descriptor& desc, Func&& pred) {
 void JoinStorageInfo(Info& base, Info& source) {
     auto& descriptors = base.storage_buffers_descriptors;
     for (auto& desc : source.storage_buffers_descriptors) {
-        auto it{std::ranges::find_if(descriptors, [&desc](const auto& existing) {
+        auto it{ranges::find_if(descriptors, [&desc](const auto& existing) {
             return desc.cbuf_index == existing.cbuf_index &&
                    desc.cbuf_offset == existing.cbuf_offset && desc.count == existing.count;
         })};

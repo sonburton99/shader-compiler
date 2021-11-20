@@ -7,6 +7,8 @@
 #include <memory>
 #include <string_view>
 
+#include <range/v3/algorithm.hpp>
+
 #include <common/common_types.h>
 #include <exception.h>
 #include "decode.h"
@@ -63,7 +65,7 @@ constexpr std::array UNORDERED_ENCODINGS{
 
 constexpr auto SortedEncodings() {
     std::array encodings{UNORDERED_ENCODINGS};
-    std::ranges::sort(encodings, [](const InstEncoding& lhs, const InstEncoding& rhs) {
+    std::sort(encodings.begin(), encodings.end(), [](const InstEncoding& lhs, const InstEncoding& rhs) {
         return std::popcount(lhs.mask_value.mask) > std::popcount(rhs.mask_value.mask);
     });
     return encodings;
@@ -137,7 +139,7 @@ const auto FAST_LOOKUP_TABLE{MakeFastLookupTable()};
 
 Opcode Decode(u64 insn) {
     const auto& table{(*FAST_LOOKUP_TABLE)[ToFastLookupIndex(insn)]};
-    const auto it{std::ranges::find_if(
+    const auto it{ranges::find_if(
         table, [insn](const InstInfo& info) { return (insn & info.Mask()) == info.Value(); })};
     if (it == table.end()) {
         throw NotImplementedException("Instruction 0x{:016x} is unknown / unimplemented", insn);

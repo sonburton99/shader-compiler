@@ -9,6 +9,8 @@
 
 #include <boost/container/small_vector.hpp>
 
+#include <range/v3/algorithm.hpp>
+
 #include "value.h"
 
 namespace Shader::IR {
@@ -42,7 +44,7 @@ auto BreadthFirstSearch(const Value& value, Pred&& pred)
             }
             // Queue instruction if it hasn't been visited
             const Inst* const arg_inst{arg_value.InstRecursive()};
-            if (std::ranges::find(visited, arg_inst) == visited.end()) {
+            if (ranges::find(visited, arg_inst) == visited.end()) {
                 visited.push_back(arg_inst);
                 queue.push(arg_inst);
             }

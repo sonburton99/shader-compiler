@@ -7,6 +7,8 @@
 
 #include <boost/container/small_vector.hpp>
 
+#include <range/v3/algorithm.hpp>
+
 #include <environment.h>
 #include <frontend/ir/basic_block.h>
 #include <frontend/ir/breadth_first_search.h>
@@ -349,7 +351,7 @@ private:
     template <typename Descriptors, typename Descriptor, typename Func>
     static u32 Add(Descriptors& descriptors, const Descriptor& desc, Func&& pred) {
         // TODO: Handle arrays
-        const auto it{std::ranges::find_if(descriptors, pred)};
+        const auto it{ranges::find_if(descriptors, pred)};
         if (it != descriptors.end()) {
             return static_cast<u32>(std::distance(descriptors.begin(), it));
         }
@@ -375,7 +377,7 @@ void TexturePass(Environment& env, IR::Program& program) {
         }
     }
     // Sort instructions to visit textures by constant buffer index, then by offset
-    std::ranges::sort(to_replace, [](const auto& lhs, const auto& rhs) {
+    ranges::sort(to_replace, [](const auto& lhs, const auto& rhs) {
         return lhs.cbuf.offset < rhs.cbuf.offset;
     });
     std::stable_sort(to_replace.begin(), to_replace.end(), [](const auto& lhs, const auto& rhs) {

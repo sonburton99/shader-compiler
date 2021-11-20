@@ -9,6 +9,8 @@
 #include <vector>
 #include <version>
 
+#include <range/v3/algorithm.hpp>
+
 #include <fmt/format.h>
 
 #include <boost/intrusive/list.hpp>
@@ -225,7 +227,7 @@ std::string DumpExpr(const Statement* stmt) {
 }
 
 void SanitizeNoBreaks(const Tree& tree) {
-    if (std::ranges::find(tree, StatementType::Break, &Statement::type) != tree.end()) {
+    if (ranges::find(tree, StatementType::Break, &Statement::type) != tree.end()) {
         throw NotImplementedException("Capturing statement with break nodes");
     }
 }
