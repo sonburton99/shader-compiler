@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <memory>
 
-#include <exception.h>
+#include <shader_compiler/exception.h>
 #include "basic_block.h"
 #include "type.h"
 #include "value.h"

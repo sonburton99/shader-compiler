@@ -8,11 +8,11 @@
 
 #include <range/v3/algorithm.hpp>
 
-#include <common/bit_cast.h>
-#include <common/bit_util.h>
-#include <exception.h>
-#include <frontend/ir/ir_emitter.h>
-#include <frontend/ir/value.h>
+#include <shader_compiler/common/bit_cast.h>
+#include <shader_compiler/common/bit_util.h>
+#include <shader_compiler/exception.h>
+#include <shader_compiler/frontend/ir/ir_emitter.h>
+#include <shader_compiler/frontend/ir/value.h>
 #include "passes.h"
 
 namespace Shader::Optimization {

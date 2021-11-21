@@ -3,7 +3,7 @@
 
 #include "emit_spirv.h"
 #include "emit_spirv_instructions.h"
-#include <frontend/ir/modifiers.h>
+#include <shader_compiler/frontend/ir/modifiers.h>
 
 namespace Shader::Backend::SPIRV {
 namespace {

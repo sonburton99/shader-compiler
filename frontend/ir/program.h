@@ -8,9 +8,9 @@
 
 #include "abstract_syntax_list.h"
 #include "basic_block.h"
-#include <program_header.h>
-#include <shader_info.h>
-#include <stage.h>
+#include <shader_compiler/program_header.h>
+#include <shader_compiler/shader_info.h>
+#include <shader_compiler/stage.h>
 
 namespace Shader::IR {
 

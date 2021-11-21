@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
-#include <common/bit_field.h>
-#include <common/common_types.h>
+#include <shader_compiler/common/bit_field.h>
+#include <shader_compiler/common/common_types.h>
 #include "common_funcs.h"
 #include "impl.h"
 

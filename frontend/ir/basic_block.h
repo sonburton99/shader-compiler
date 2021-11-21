@@ -10,11 +10,11 @@
 
 #include <boost/intrusive/list.hpp>
 
-#include <common/bit_cast.h>
-#include <common/common_types.h>
+#include <shader_compiler/common/bit_cast.h>
+#include <shader_compiler/common/common_types.h>
 #include "condition.h"
 #include "value.h"
-#include <object_pool.h>
+#include <shader_compiler/object_pool.h>
 
 namespace Shader::IR {
 

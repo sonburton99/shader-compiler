@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
-#include <environment.h>
-#include <frontend/ir/basic_block.h>
-#include <frontend/maxwell/decode.h>
-#include <frontend/maxwell/location.h>
+#include <shader_compiler/environment.h>
+#include <shader_compiler/frontend/ir/basic_block.h>
+#include <shader_compiler/frontend/maxwell/decode.h>
+#include <shader_compiler/frontend/maxwell/location.h>
 #include "impl/impl.h"
 #include "translate.h"
 
@@ -36,7 +36,7 @@ void Translate(Environment& env, IR::Block* block, u32 location_begin, u32 locat
     case Opcode::name:                                                                             \
         Invoke<&TranslatorVisitor::name>(visitor, pc, insn);                                       \
         break;
-#include <frontend/maxwell/maxwell.inc>
+#include <shader_compiler/frontend/maxwell/maxwell.inc>
 #undef OPCODE
             default:
                 throw LogicError("Invalid opcode {}", opcode);

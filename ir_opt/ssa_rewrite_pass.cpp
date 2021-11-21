@@ -23,11 +23,11 @@
 #include <boost/container/flat_map.hpp>
 #include <boost/container/flat_set.hpp>
 
-#include <frontend/ir/basic_block.h>
-#include <frontend/ir/opcodes.h>
-#include <frontend/ir/pred.h>
-#include <frontend/ir/reg.h>
-#include <frontend/ir/value.h>
+#include <shader_compiler/frontend/ir/basic_block.h>
+#include <shader_compiler/frontend/ir/opcodes.h>
+#include <shader_compiler/frontend/ir/pred.h>
+#include <shader_compiler/frontend/ir/reg.h>
+#include <shader_compiler/frontend/ir/value.h>
 #include "passes.h"
 
 namespace Shader::Optimization {

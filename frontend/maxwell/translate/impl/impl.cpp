@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
-#include <common/bit_field.h>
-#include <frontend/ir/ir_emitter.h>
+#include <shader_compiler/common/bit_field.h>
+#include <shader_compiler/frontend/ir/ir_emitter.h>
 #include "impl.h"
 
 namespace Shader::Maxwell {

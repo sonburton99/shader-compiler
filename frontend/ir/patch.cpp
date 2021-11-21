@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
-#include <exception.h>
+#include <shader_compiler/exception.h>
 #include "patch.h"
 
 namespace Shader::IR {

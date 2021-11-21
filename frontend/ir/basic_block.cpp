@@ -8,8 +8,8 @@
 
 #include <range/v3/algorithm.hpp>
 
-#include <common/bit_cast.h>
-#include <common/common_types.h>
+#include <shader_compiler/common/bit_cast.h>
+#include <shader_compiler/common/common_types.h>
 #include "basic_block.h"
 #include "value.h"
 

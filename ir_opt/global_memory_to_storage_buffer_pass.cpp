@@ -11,11 +11,11 @@
 
 #include <range/v3/algorithm.hpp>
 
-#include <common/alignment.h>
-#include <frontend/ir/basic_block.h>
-#include <frontend/ir/breadth_first_search.h>
-#include <frontend/ir/ir_emitter.h>
-#include <frontend/ir/value.h>
+#include <shader_compiler/common/alignment.h>
+#include <shader_compiler/frontend/ir/basic_block.h>
+#include <shader_compiler/frontend/ir/breadth_first_search.h>
+#include <shader_compiler/frontend/ir/ir_emitter.h>
+#include <shader_compiler/frontend/ir/value.h>
 #include "passes.h"
 
 namespace Shader::Optimization {

@@ -5,7 +5,7 @@
 
 #include "emit_context.h"
 #include "emit_glsl_instructions.h"
-#include <exception.h>
+#include <shader_compiler/exception.h>
 
 namespace Shader::Backend::GLSL {
 

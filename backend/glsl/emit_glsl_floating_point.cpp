@@ -5,8 +5,8 @@
 
 #include "emit_context.h"
 #include "emit_glsl_instructions.h"
-#include <frontend/ir/modifiers.h>
-#include <frontend/ir/value.h>
+#include <shader_compiler/frontend/ir/modifiers.h>
+#include <shader_compiler/frontend/ir/value.h>
 
 namespace Shader::Backend::GLSL {
 namespace {

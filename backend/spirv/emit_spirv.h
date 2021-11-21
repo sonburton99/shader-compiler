@@ -7,11 +7,11 @@
 
 #include <sirit/sirit.h>
 
-#include <common/common_types.h>
-#include <backend/bindings.h>
+#include <shader_compiler/common/common_types.h>
+#include <shader_compiler/backend/bindings.h>
 #include "emit_context.h"
-#include <frontend/ir/program.h>
-#include <profile.h>
+#include <shader_compiler/frontend/ir/program.h>
+#include <shader_compiler/profile.h>
 
 namespace Shader::Backend::SPIRV {
 

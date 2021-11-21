@@ -10,7 +10,7 @@
 #include <fmt/format.h>
 
 #include "var_alloc.h"
-#include <stage.h>
+#include <shader_compiler/stage.h>
 
 namespace Shader {
 struct Info;

@@ -11,8 +11,8 @@
 
 #include <fmt/format.h>
 
-#include <common/common_types.h>
-#include <common/div_ceil.h>
+#include <shader_compiler/common/common_types.h>
+#include <shader_compiler/common/div_ceil.h>
 #include "emit_context.h"
 #include "emit_spirv.h"
 

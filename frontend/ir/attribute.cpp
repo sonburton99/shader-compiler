@@ -3,7 +3,7 @@
 
 #include <fmt/format.h>
 
-#include <exception.h>
+#include <shader_compiler/exception.h>
 #include "attribute.h"
 
 namespace Shader::IR {

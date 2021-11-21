@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include <common/bit_field.h>
-#include <common/common_types.h>
-#include <frontend/ir/flow_test.h>
-#include <frontend/ir/reg.h>
+#include <shader_compiler/common/bit_field.h>
+#include <shader_compiler/common/common_types.h>
+#include <shader_compiler/frontend/ir/flow_test.h>
+#include <shader_compiler/frontend/ir/reg.h>
 
 namespace Shader::Maxwell {
 

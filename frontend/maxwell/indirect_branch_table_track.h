@@ -5,10 +5,10 @@
 
 #include <optional>
 
-#include <common/bit_field.h>
-#include <common/common_types.h>
-#include <environment.h>
-#include <frontend/ir/reg.h>
+#include <shader_compiler/common/bit_field.h>
+#include <shader_compiler/common/common_types.h>
+#include <shader_compiler/environment.h>
+#include <shader_compiler/frontend/ir/reg.h>
 #include "location.h"
 
 namespace Shader::Maxwell {

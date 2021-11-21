@@ -5,7 +5,7 @@
 
 #include "emit_context.h"
 #include "emit_glsl_instructions.h"
-#include <frontend/ir/value.h>
+#include <shader_compiler/frontend/ir/value.h>
 
 namespace Shader::Backend::GLSL {
 void EmitConvertS16F16([[maybe_unused]] EmitContext& ctx, [[maybe_unused]] IR::Inst& inst,

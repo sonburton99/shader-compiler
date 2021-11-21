@@ -3,8 +3,8 @@
 
 #include <algorithm>
 
-#include <frontend/ir/ir_emitter.h>
-#include <frontend/ir/value.h>
+#include <shader_compiler/frontend/ir/ir_emitter.h>
+#include <shader_compiler/frontend/ir/value.h>
 #include "passes.h"
 
 namespace Shader::Optimization {

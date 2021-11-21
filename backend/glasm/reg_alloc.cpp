@@ -7,8 +7,8 @@
 
 #include "emit_context.h"
 #include "reg_alloc.h"
-#include <exception.h>
-#include <frontend/ir/value.h>
+#include <shader_compiler/exception.h>
+#include <shader_compiler/frontend/ir/value.h>
 
 namespace Shader::Backend::GLASM {
 

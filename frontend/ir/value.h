@@ -13,10 +13,10 @@
 #include <boost/container/small_vector.hpp>
 #include <boost/intrusive/list.hpp>
 
-#include <common/assert.h>
-#include <common/bit_cast.h>
-#include <common/common_types.h>
-#include <exception.h>
+#include <shader_compiler/common/assert.h>
+#include <shader_compiler/common/bit_cast.h>
+#include <shader_compiler/common/common_types.h>
+#include <shader_compiler/exception.h>
 #include "attribute.h"
 #include "opcodes.h"
 #include "patch.h"

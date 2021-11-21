@@ -8,7 +8,7 @@
 
 #include <fmt/format.h>
 
-#include <common/common_types.h>
+#include <shader_compiler/common/common_types.h>
 #include "flow_test.h"
 #include "pred.h"
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
-#include <frontend/ir/ir_emitter.h>
+#include <shader_compiler/frontend/ir/ir_emitter.h>
 #include "passes.h"
 
 namespace Shader::Optimization {

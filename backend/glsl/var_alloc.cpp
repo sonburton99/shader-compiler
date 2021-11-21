@@ -7,8 +7,8 @@
 #include <fmt/format.h>
 
 #include "var_alloc.h"
-#include <exception.h>
-#include <frontend/ir/value.h>
+#include <shader_compiler/exception.h>
+#include <shader_compiler/frontend/ir/value.h>
 
 namespace Shader::Backend::GLSL {
 namespace {

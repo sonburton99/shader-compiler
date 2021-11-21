@@ -5,7 +5,7 @@
 
 #include "emit_context.h"
 #include "emit_glsl_instructions.h"
-#include <frontend/ir/value.h>
+#include <shader_compiler/frontend/ir/value.h>
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4100)

@@ -9,12 +9,12 @@
 
 #include <range/v3/algorithm.hpp>
 
-#include <environment.h>
-#include <frontend/ir/basic_block.h>
-#include <frontend/ir/breadth_first_search.h>
-#include <frontend/ir/ir_emitter.h>
+#include <shader_compiler/environment.h>
+#include <shader_compiler/frontend/ir/basic_block.h>
+#include <shader_compiler/frontend/ir/breadth_first_search.h>
+#include <shader_compiler/frontend/ir/ir_emitter.h>
 #include "passes.h"
-#include <shader_info.h>
+#include <shader_compiler/shader_info.h>
 
 namespace Shader::Optimization {
 namespace {

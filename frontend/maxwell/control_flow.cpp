@@ -11,7 +11,7 @@
 
 #include <fmt/format.h>
 
-#include <exception.h>
+#include <shader_compiler/exception.h>
 #include "control_flow.h"
 #include "decode.h"
 #include "indirect_branch_table_track.h"

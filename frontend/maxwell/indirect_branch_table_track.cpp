@@ -3,8 +3,8 @@
 
 #include <optional>
 
-#include <common/common_types.h>
-#include <exception.h>
+#include <shader_compiler/common/common_types.h>
+#include <shader_compiler/exception.h>
 #include "decode.h"
 #include "indirect_branch_table_track.h"
 #include "opcodes.h"

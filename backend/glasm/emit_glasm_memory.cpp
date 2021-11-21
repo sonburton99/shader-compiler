@@ -5,9 +5,9 @@
 
 #include "emit_context.h"
 #include "emit_glasm_instructions.h"
-#include <frontend/ir/program.h>
-#include <frontend/ir/value.h>
-#include <runtime_info.h>
+#include <shader_compiler/frontend/ir/program.h>
+#include <shader_compiler/frontend/ir/value.h>
+#include <shader_compiler/runtime_info.h>
 
 namespace Shader::Backend::GLASM {
 namespace {

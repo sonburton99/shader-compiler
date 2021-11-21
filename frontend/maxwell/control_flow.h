@@ -12,12 +12,12 @@
 #include <boost/container/small_vector.hpp>
 #include <boost/intrusive/set.hpp>
 
-#include <environment.h>
-#include <frontend/ir/condition.h>
+#include <shader_compiler/environment.h>
+#include <shader_compiler/frontend/ir/condition.h>
 #include "instruction.h"
 #include "location.h"
 #include "opcodes.h"
-#include <object_pool.h>
+#include <shader_compiler/object_pool.h>
 
 namespace Shader::Maxwell::Flow {
 

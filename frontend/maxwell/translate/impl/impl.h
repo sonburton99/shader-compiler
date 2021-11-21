@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include <environment.h>
-#include <frontend/ir/basic_block.h>
-#include <frontend/ir/ir_emitter.h>
-#include <frontend/maxwell/instruction.h>
+#include <shader_compiler/environment.h>
+#include <shader_compiler/frontend/ir/basic_block.h>
+#include <shader_compiler/frontend/ir/ir_emitter.h>
+#include <shader_compiler/frontend/maxwell/instruction.h>
 
 namespace Shader::Maxwell {
 

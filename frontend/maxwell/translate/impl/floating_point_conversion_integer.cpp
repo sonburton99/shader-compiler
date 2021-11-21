@@ -3,9 +3,9 @@
 
 #include <limits>
 
-#include <common/common_types.h>
-#include <exception.h>
-#include <frontend/maxwell/opcodes.h>
+#include <shader_compiler/common/common_types.h>
+#include <shader_compiler/exception.h>
+#include <shader_compiler/frontend/maxwell/opcodes.h>
 #include "impl.h"
 
 namespace Shader::Maxwell {

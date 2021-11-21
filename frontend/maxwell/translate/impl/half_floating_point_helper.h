@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <common/common_types.h>
-#include <exception.h>
+#include <shader_compiler/common/common_types.h>
+#include <shader_compiler/exception.h>
 #include "common_encoding.h"
 #include "common_funcs.h"
 #include "impl.h"

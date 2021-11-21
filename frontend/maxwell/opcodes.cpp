@@ -3,7 +3,7 @@
 
 #include <array>
 
-#include <exception.h>
+#include <shader_compiler/exception.h>
 #include "opcodes.h"
 
 namespace Shader::Maxwell {
