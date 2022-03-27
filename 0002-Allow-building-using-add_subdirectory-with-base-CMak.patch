@@ -1,0 +1,23 @@
+From 7e39e8859336aa6c1bff44725159edc791772d6a Mon Sep 17 00:00:00 2001
+From: PixelyIon <pixelyion@protonmail.com>
+Date: Sat, 20 Nov 2021 12:55:51 +0530
+Subject: [PATCH 2/7] Allow building using `add_subdirectory` with base CMake
+
+yuzu defines a CMake function `create_target_directory_groups` which we don't intend to utilize and are removing from here. This shouldn't affect anything.
+---
+ CMakeLists.txt | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4c76ce1..eec4974 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -265,5 +265,3 @@ else()
+         $<$<CXX_COMPILER_ID:Clang>:-fbracket-depth=1024>
+     )
+ endif()
+-
+-create_target_directory_groups(shader_recompiler)
+-- 
+2.35.1
+
