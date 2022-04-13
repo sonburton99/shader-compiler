@@ -1,15 +1,14 @@
-// Copyright 2021 yuzu Emulator Project
-// Licensed under GPLv2 or any later version
-// Refer to the license.txt file included.
+// SPDX-License-Identifier: MPL-2.0
+// Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
 #pragma once
 
 #include <array>
 #include <bitset>
 
-#include "common/common_types.h"
-#include "shader_recompiler/frontend/ir/type.h"
-#include "shader_recompiler/varying_state.h"
+#include <shader_compiler/common/common_types.h>
+#include <shader_compiler/frontend/ir/type.h>
+#include <shader_compiler/varying_state.h>
 
 #include <boost/container/small_vector.hpp>
 #include <boost/container/static_vector.hpp>

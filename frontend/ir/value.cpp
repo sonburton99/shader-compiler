@@ -1,8 +1,7 @@
-// Copyright 2021 yuzu Emulator Project
-// Licensed under GPLv2 or any later version
-// Refer to the license.txt file included.
+// SPDX-License-Identifier: MPL-2.0
+// Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
-#include "shader_recompiler/frontend/ir/value.h"
+#include <shader_compiler/frontend/ir/value.h>
 
 namespace Shader::IR {
 

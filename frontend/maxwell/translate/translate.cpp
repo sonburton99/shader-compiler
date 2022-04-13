@@ -1,13 +1,12 @@
-// Copyright 2021 yuzu Emulator Project
-// Licensed under GPLv2 or any later version
-// Refer to the license.txt file included.
+// SPDX-License-Identifier: MPL-2.0
+// Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
-#include "shader_recompiler/environment.h"
-#include "shader_recompiler/frontend/ir/basic_block.h"
-#include "shader_recompiler/frontend/maxwell/decode.h"
-#include "shader_recompiler/frontend/maxwell/location.h"
-#include "shader_recompiler/frontend/maxwell/translate/impl/impl.h"
-#include "shader_recompiler/frontend/maxwell/translate/translate.h"
+#include <shader_compiler/environment.h>
+#include <shader_compiler/frontend/ir/basic_block.h>
+#include <shader_compiler/frontend/maxwell/decode.h>
+#include <shader_compiler/frontend/maxwell/location.h>
+#include <shader_compiler/frontend/maxwell/translate/impl/impl.h>
+#include <shader_compiler/frontend/maxwell/translate/translate.h>
 
 namespace Shader::Maxwell {
 
@@ -37,7 +36,7 @@ void Translate(Environment& env, IR::Block* block, u32 location_begin, u32 locat
     case Opcode::name:                                                                             \
         Invoke<&TranslatorVisitor::name>(visitor, pc, insn);                                       \
         break;
-#include "shader_recompiler/frontend/maxwell/maxwell.inc"
+#include <shader_compiler/frontend/maxwell/maxwell.inc>
 #undef OPCODE
             default:
                 throw LogicError("Invalid opcode {}", opcode);

@@ -1,6 +1,5 @@
-// Copyright 2021 yuzu Emulator Project
-// Licensed under GPLv2 or any later version
-// Refer to the license.txt file included.
+// SPDX-License-Identifier: MPL-2.0
+// Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
 INST(AL2P,         "AL2P",           "1110 1111 1010 0---")
 INST(ALD,          "ALD",            "1110 1111 1101 1---")

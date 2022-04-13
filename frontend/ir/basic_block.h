@@ -1,6 +1,5 @@
-// Copyright 2021 yuzu Emulator Project
-// Licensed under GPLv2 or any later version
-// Refer to the license.txt file included.
+// SPDX-License-Identifier: MPL-2.0
+// Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
 #pragma once
 
@@ -11,11 +10,11 @@
 
 #include <boost/intrusive/list.hpp>
 
-#include "common/bit_cast.h"
-#include "common/common_types.h"
-#include "shader_recompiler/frontend/ir/condition.h"
-#include "shader_recompiler/frontend/ir/value.h"
-#include "shader_recompiler/object_pool.h"
+#include <shader_compiler/common/bit_cast.h>
+#include <shader_compiler/common/common_types.h>
+#include <shader_compiler/frontend/ir/condition.h>
+#include <shader_compiler/frontend/ir/value.h>
+#include <shader_compiler/object_pool.h>
 
 namespace Shader::IR {
 

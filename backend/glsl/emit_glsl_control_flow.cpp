@@ -1,10 +1,9 @@
-// Copyright 2021 yuzu Emulator Project
-// Licensed under GPLv2 or any later version
-// Refer to the license.txt file included.
+// SPDX-License-Identifier: MPL-2.0
+// Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
-#include "shader_recompiler/backend/glsl/emit_glsl_instructions.h"
-#include "shader_recompiler/backend/glsl/glsl_emit_context.h"
-#include "shader_recompiler/exception.h"
+#include <shader_compiler/backend/glsl/emit_glsl_instructions.h>
+#include <shader_compiler/backend/glsl/glsl_emit_context.h>
+#include <shader_compiler/exception.h>
 
 namespace Shader::Backend::GLSL {
 

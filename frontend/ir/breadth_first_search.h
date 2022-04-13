@@ -1,16 +1,16 @@
-// Copyright 2021 yuzu Emulator Project
-// Licensed under GPLv2 or any later version
-// Refer to the license.txt file included.
+// SPDX-License-Identifier: MPL-2.0
+// Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
 #pragma once
 
+#include <range/v3/algorithm.hpp>
 #include <optional>
 #include <type_traits>
 #include <queue>
 
 #include <boost/container/small_vector.hpp>
 
-#include "shader_recompiler/frontend/ir/value.h"
+#include <shader_compiler/frontend/ir/value.h>
 
 namespace Shader::IR {
 
@@ -43,7 +43,7 @@ auto BreadthFirstSearch(const Value& value, Pred&& pred)
             }
             // Queue instruction if it hasn't been visited
             const Inst* const arg_inst{arg_value.InstRecursive()};
-            if (std::ranges::find(visited, arg_inst) == visited.end()) {
+            if (ranges::find(visited, arg_inst) == visited.end()) {
                 visited.push_back(arg_inst);
                 queue.push(arg_inst);
             }

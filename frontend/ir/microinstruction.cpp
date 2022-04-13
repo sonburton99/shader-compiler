@@ -1,14 +1,14 @@
-// Copyright 2021 yuzu Emulator Project
-// Licensed under GPLv2 or any later version
-// Refer to the license.txt file included.
+// SPDX-License-Identifier: MPL-2.0
+// Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
+#include <range/v3/algorithm.hpp>
 #include <algorithm>
 #include <memory>
 
-#include "shader_recompiler/exception.h"
-#include "shader_recompiler/frontend/ir/basic_block.h"
-#include "shader_recompiler/frontend/ir/type.h"
-#include "shader_recompiler/frontend/ir/value.h"
+#include <shader_compiler/exception.h>
+#include <shader_compiler/frontend/ir/basic_block.h>
+#include <shader_compiler/frontend/ir/type.h>
+#include <shader_compiler/frontend/ir/value.h>
 
 namespace Shader::IR {
 namespace {
@@ -362,7 +362,7 @@ void Inst::ClearArgs() {
             }
         }
         // Reset arguments to null
-        // std::memset was measured to be faster on MSVC than std::ranges:fill
+        // std::memset was measured to be faster on MSVC than ranges:fill
         std::memset(reinterpret_cast<char*>(&args), 0, sizeof(args));
     }
 }

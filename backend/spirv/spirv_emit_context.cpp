@@ -1,6 +1,5 @@
-// Copyright 2021 yuzu Emulator Project
-// Licensed under GPLv2 or any later version
-// Refer to the license.txt file included.
+// SPDX-License-Identifier: MPL-2.0
+// Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
 #include <algorithm>
 #include <array>
@@ -11,10 +10,10 @@
 
 #include <fmt/format.h>
 
-#include "common/common_types.h"
-#include "common/div_ceil.h"
-#include "shader_recompiler/backend/spirv/emit_spirv.h"
-#include "shader_recompiler/backend/spirv/spirv_emit_context.h"
+#include <shader_compiler/common/common_types.h>
+#include <shader_compiler/common/div_ceil.h>
+#include <shader_compiler/backend/spirv/emit_spirv.h>
+#include <shader_compiler/backend/spirv/spirv_emit_context.h>
 
 namespace Shader::Backend::SPIRV {
 namespace {

@@ -1,15 +1,14 @@
-// Copyright 2021 yuzu Emulator Project
-// Licensed under GPLv2 or any later version
-// Refer to the license.txt file included.
+// SPDX-License-Identifier: MPL-2.0
+// Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
 #pragma once
 
 #include <array>
 
-#include "common/common_types.h"
-#include "shader_recompiler/program_header.h"
-#include "shader_recompiler/shader_info.h"
-#include "shader_recompiler/stage.h"
+#include <shader_compiler/common/common_types.h>
+#include <shader_compiler/program_header.h>
+#include <shader_compiler/shader_info.h>
+#include <shader_compiler/stage.h>
 
 namespace Shader {
 

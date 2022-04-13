@@ -1,15 +1,14 @@
-// Copyright 2021 yuzu Emulator Project
-// Licensed under GPLv2 or any later version
-// Refer to the license.txt file included.
+// SPDX-License-Identifier: MPL-2.0
+// Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
 #pragma once
 
-#include "shader_recompiler/environment.h"
-#include "shader_recompiler/frontend/ir/basic_block.h"
-#include "shader_recompiler/frontend/ir/program.h"
-#include "shader_recompiler/frontend/maxwell/control_flow.h"
-#include "shader_recompiler/object_pool.h"
-#include "shader_recompiler/runtime_info.h"
+#include <shader_compiler/environment.h>
+#include <shader_compiler/frontend/ir/basic_block.h>
+#include <shader_compiler/frontend/ir/program.h>
+#include <shader_compiler/frontend/maxwell/control_flow.h>
+#include <shader_compiler/object_pool.h>
+#include <shader_compiler/runtime_info.h>
 
 namespace Shader {
 struct HostTranslateInfo;

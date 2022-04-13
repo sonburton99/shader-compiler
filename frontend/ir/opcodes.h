@@ -1,15 +1,15 @@
-// Copyright 2021 yuzu Emulator Project
-// Licensed under GPLv2 or any later version
-// Refer to the license.txt file included.
+// SPDX-License-Identifier: MPL-2.0
+// Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
 #pragma once
 
+#include <range/v3/algorithm.hpp>
 #include <algorithm>
 #include <array>
 
 #include <fmt/format.h>
 
-#include "shader_recompiler/frontend/ir/type.h"
+#include <shader_compiler/frontend/ir/type.h>
 
 namespace Shader::IR {
 
@@ -67,7 +67,7 @@ constexpr OpcodeMeta META_TABLE[]{
 constexpr size_t CalculateNumArgsOf(Opcode op) {
     const auto& arg_types{META_TABLE[static_cast<size_t>(op)].arg_types};
     return static_cast<size_t>(
-        std::distance(arg_types.begin(), std::ranges::find(arg_types, Type::Void)));
+        std::distance(arg_types.begin(), ranges::find(arg_types, Type::Void)));
 }
 
 constexpr u8 NUM_ARGS[]{

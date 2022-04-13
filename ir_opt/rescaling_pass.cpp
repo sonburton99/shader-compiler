@@ -1,15 +1,14 @@
-// Copyright 2021 yuzu Emulator Project
-// Licensed under GPLv2 or any later version
-// Refer to the license.txt file included.
+// SPDX-License-Identifier: MPL-2.0
+// Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
-#include "common/settings.h"
-#include "shader_recompiler/environment.h"
-#include "shader_recompiler/frontend/ir/ir_emitter.h"
-#include "shader_recompiler/frontend/ir/modifiers.h"
-#include "shader_recompiler/frontend/ir/program.h"
-#include "shader_recompiler/frontend/ir/value.h"
-#include "shader_recompiler/ir_opt/passes.h"
-#include "shader_recompiler/shader_info.h"
+#include <shader_compiler/common/settings.h>
+#include <shader_compiler/environment.h>
+#include <shader_compiler/frontend/ir/ir_emitter.h>
+#include <shader_compiler/frontend/ir/modifiers.h>
+#include <shader_compiler/frontend/ir/program.h>
+#include <shader_compiler/frontend/ir/value.h>
+#include <shader_compiler/ir_opt/passes.h>
+#include <shader_compiler/shader_info.h>
 
 namespace Shader::Optimization {
 namespace {

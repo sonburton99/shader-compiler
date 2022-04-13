@@ -1,7 +1,7 @@
-// Copyright 2021 yuzu Emulator Project
-// Licensed under GPLv2 or any later version
-// Refer to the license.txt file included.
+// SPDX-License-Identifier: MPL-2.0
+// Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
+#include <range/v3/algorithm.hpp>
 #include <algorithm>
 #include <memory>
 #include <string>
@@ -13,13 +13,13 @@
 
 #include <boost/intrusive/list.hpp>
 
-#include "shader_recompiler/environment.h"
-#include "shader_recompiler/frontend/ir/basic_block.h"
-#include "shader_recompiler/frontend/ir/ir_emitter.h"
-#include "shader_recompiler/frontend/maxwell/structured_control_flow.h"
-#include "shader_recompiler/frontend/maxwell/translate/translate.h"
-#include "shader_recompiler/host_translate_info.h"
-#include "shader_recompiler/object_pool.h"
+#include <shader_compiler/environment.h>
+#include <shader_compiler/frontend/ir/basic_block.h>
+#include <shader_compiler/frontend/ir/ir_emitter.h>
+#include <shader_compiler/frontend/maxwell/structured_control_flow.h>
+#include <shader_compiler/frontend/maxwell/translate/translate.h>
+#include <shader_compiler/host_translate_info.h>
+#include <shader_compiler/object_pool.h>
 
 namespace Shader::Maxwell {
 namespace {
@@ -224,7 +224,7 @@ std::string DumpExpr(const Statement* stmt) {
 }
 
 void SanitizeNoBreaks(const Tree& tree) {
-    if (std::ranges::find(tree, StatementType::Break, &Statement::type) != tree.end()) {
+    if (ranges::find(tree, StatementType::Break, &Statement::type) != tree.end()) {
         throw NotImplementedException("Capturing statement with break nodes");
     }
 }

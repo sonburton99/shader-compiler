@@ -1,15 +1,14 @@
-// Copyright 2021 yuzu Emulator Project
-// Licensed under GPLv2 or any later version
-// Refer to the license.txt file included.
+// SPDX-License-Identifier: MPL-2.0
+// Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
 #include <string>
 #include <string_view>
 
 #include <fmt/format.h>
 
-#include "shader_recompiler/backend/glsl/var_alloc.h"
-#include "shader_recompiler/exception.h"
-#include "shader_recompiler/frontend/ir/value.h"
+#include <shader_compiler/backend/glsl/var_alloc.h>
+#include <shader_compiler/exception.h>
+#include <shader_compiler/frontend/ir/value.h>
 
 namespace Shader::Backend::GLSL {
 namespace {

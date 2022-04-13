@@ -1,13 +1,12 @@
-// Copyright 2021 yuzu Emulator Project
-// Licensed under GPLv2 or any later version
-// Refer to the license.txt file included.
+// SPDX-License-Identifier: MPL-2.0
+// Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
 #pragma once
 
-#include "shader_recompiler/environment.h"
-#include "shader_recompiler/frontend/ir/basic_block.h"
-#include "shader_recompiler/frontend/ir/ir_emitter.h"
-#include "shader_recompiler/frontend/maxwell/instruction.h"
+#include <shader_compiler/environment.h>
+#include <shader_compiler/frontend/ir/basic_block.h>
+#include <shader_compiler/frontend/ir/ir_emitter.h>
+#include <shader_compiler/frontend/maxwell/instruction.h>
 
 namespace Shader::Maxwell {
 

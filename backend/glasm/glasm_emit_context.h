@@ -1,6 +1,5 @@
-// Copyright 2021 yuzu Emulator Project
-// Licensed under GPLv2 or any later version
-// Refer to the license.txt file included.
+// SPDX-License-Identifier: MPL-2.0
+// Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
 #pragma once
 
@@ -10,8 +9,8 @@
 
 #include <fmt/format.h>
 
-#include "shader_recompiler/backend/glasm/reg_alloc.h"
-#include "shader_recompiler/stage.h"
+#include <shader_compiler/backend/glasm/reg_alloc.h>
+#include <shader_compiler/stage.h>
 
 namespace Shader {
 struct Info;

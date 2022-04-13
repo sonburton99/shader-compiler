@@ -1,6 +1,5 @@
-// Copyright 2021 yuzu Emulator Project
-// Licensed under GPLv2 or any later version
-// Refer to the license.txt file included.
+// SPDX-License-Identifier: MPL-2.0
+// Copyright © 2021 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
 // This file implements the SSA rewriting algorithm proposed in
 //
@@ -14,6 +13,7 @@
 //      https://link.springer.com/chapter/10.1007/978-3-642-37051-9_6
 //
 
+#include <range/v3/algorithm.hpp>
 #include <deque>
 #include <span>
 #include <variant>
@@ -21,12 +21,12 @@
 
 #include <boost/container/flat_map.hpp>
 
-#include "shader_recompiler/frontend/ir/basic_block.h"
-#include "shader_recompiler/frontend/ir/opcodes.h"
-#include "shader_recompiler/frontend/ir/pred.h"
-#include "shader_recompiler/frontend/ir/reg.h"
-#include "shader_recompiler/frontend/ir/value.h"
-#include "shader_recompiler/ir_opt/passes.h"
+#include <shader_compiler/frontend/ir/basic_block.h>
+#include <shader_compiler/frontend/ir/opcodes.h>
+#include <shader_compiler/frontend/ir/pred.h>
+#include <shader_compiler/frontend/ir/reg.h>
+#include <shader_compiler/frontend/ir/value.h>
+#include <shader_compiler/ir_opt/passes.h>
 
 namespace Shader::Optimization {
 namespace {
@@ -280,7 +280,7 @@ private:
         list.erase(IR::Block::InstructionList::s_iterator_to(phi));
 
         // Find the first non-phi instruction and use it as an insertion point
-        IR::Block::iterator reinsert_point{std::ranges::find_if_not(list, IR::IsPhi)};
+        IR::Block::iterator reinsert_point{ranges::find_if_not(list, IR::IsPhi)};
         if (same.IsEmpty()) {
             // The phi is unreachable or in the start block
             // Insert an undefined instruction and make it the phi node replacement
