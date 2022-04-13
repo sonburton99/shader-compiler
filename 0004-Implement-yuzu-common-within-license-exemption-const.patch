@@ -1,24 +1,24 @@
-From fbff4fbfebada1afff21bdfe629f4c6ff3fad807 Mon Sep 17 00:00:00 2001
+From 0668551535718555638d0de3001f33274a6e0a49 Mon Sep 17 00:00:00 2001
 From: PixelyIon <pixelyion@protonmail.com>
 Date: Sat, 20 Nov 2021 22:02:00 +0530
-Subject: [PATCH 4/7] Implement yuzu `common` within license exemption
- constraints
+Subject: [PATCH] Implement yuzu `common` within license exemption constraints
 
 The shader compiler use a subset of yuzu's `common`, this contains a lot of GPL code that isn't covered under our exemptions so we needed to selectively reimplement parts of it alongside certain parts that just don't map to Skyline such as `Settings`.
 ---
- CMakeLists.txt        |  2 +-
- common/README.md      |  7 ++++
- common/alignment.h    | 93 +++++++++++++++++++++++++++++++++++++++++++
- common/assert.h       | 12 ++++++
- common/bit_cast.h     | 17 ++++++++
- common/bit_field.h    | 40 +++++++++++++++++++
- common/bit_util.h     | 46 +++++++++++++++++++++
- common/common_funcs.h | 42 +++++++++++++++++++
- common/common_types.h | 23 +++++++++++
- common/div_ceil.h     | 25 ++++++++++++
- common/log.h          |  8 ++++
- common/settings.h     | 25 ++++++++++++
- 12 files changed, 339 insertions(+), 1 deletion(-)
+ CMakeLists.txt             |  2 +-
+ common/README.md           |  7 +++
+ common/alignment.h         | 93 ++++++++++++++++++++++++++++++++++++++
+ common/assert.h            | 12 +++++
+ common/bit_cast.h          | 17 +++++++
+ common/bit_field.h         | 40 ++++++++++++++++
+ common/bit_util.h          | 46 +++++++++++++++++++
+ common/common_funcs.h      | 42 +++++++++++++++++
+ common/common_types.h      | 23 ++++++++++
+ common/div_ceil.h          | 25 ++++++++++
+ common/log.h               |  8 ++++
+ common/logging/formatter.h | 20 ++++++++
+ common/settings.h          | 25 ++++++++++
+ 13 files changed, 359 insertions(+), 1 deletion(-)
  create mode 100644 common/README.md
  create mode 100644 common/alignment.h
  create mode 100644 common/assert.h
@@ -29,6 +29,7 @@ The shader compiler use a subset of yuzu's `common`, this contains a lot of GPL 
  create mode 100644 common/common_types.h
  create mode 100644 common/div_ceil.h
  create mode 100644 common/log.h
+ create mode 100644 common/logging/formatter.h
  create mode 100644 common/settings.h
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
@@ -417,6 +418,32 @@ index 0000000..5e01521
 +#define LOG_DEBUG(...)
 +#define LOG_WARNING(...)
 +#define LOG_ERROR(...)
+diff --git a/common/logging/formatter.h b/common/logging/formatter.h
+new file mode 100644
+index 0000000..d8378ba
+--- /dev/null
++++ b/common/logging/formatter.h
+@@ -0,0 +1,20 @@
++// SPDX-License-Identifier: MPL-2.0
++// Copyright © 2021 Skyline Team and Contributors (https://github.com/skyline-emu/)
++
++#pragma once
++
++#include <type_traits>
++
++#include <fmt/format.h>
++
++// adapted from https://github.com/fmtlib/fmt/issues/2704
++// a generic formatter for enum classes
++#if FMT_VERSION >= 80100
++template <typename E>
++struct fmt::formatter<E, std::enable_if_t<std::is_enum_v<E>, char>> : formatter<std::underlying_type_t<E>> {
++    template <typename FormatContext>
++    auto format(const E& value, FormatContext& ctx) -> decltype(ctx.out()) {
++        return fmt::formatter<std::underlying_type_t<E>>::format(static_cast<std::underlying_type_t<E>>(value), ctx);
++    }
++};
++#endif
 diff --git a/common/settings.h b/common/settings.h
 new file mode 100644
 index 0000000..3d3c225
