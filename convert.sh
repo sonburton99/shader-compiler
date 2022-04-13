@@ -1,6 +1,6 @@
 #!/bin/bash
 
-git am skyline-conversion/*
+git am skyline-conversion/*.patch
 
 grep -rl '// Copyright 2021 yuzu Emulator Project' --exclude-dir={.git,skyline-conversion} | xargs sed -i 's/\/\/ Copyright 2021 yuzu Emulator Project/\/\/ SPDX-License-Identifier: MPL-2.0/g' 
 grep -rl '// Licensed under GPLv2 or any later version' --exclude-dir={.git,skyline-conversion} | xargs sed -i 's/\/\/ Licensed under GPLv2 or any later version/\/\/ Copyright © 2021 yuzu Emulator Project (https:\/\/github.com\/yuzu-emu\/yuzu\/)/g' 
