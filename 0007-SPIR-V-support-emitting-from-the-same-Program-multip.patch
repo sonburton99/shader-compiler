@@ -1,0 +1,156 @@
+From 3a90748588468b6a3d8d5553a04824ff6a47f4a4 Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Sun, 8 May 2022 18:27:18 +0100
+Subject: [PATCH 7/9] SPIR-V: support emitting from the same Program multiple
+ times
+
+---
+ backend/spirv/emit_spirv.cpp         |  5 +++++
+ backend/spirv/emit_spirv_image.cpp   |  2 +-
+ backend/spirv/emit_spirv_integer.cpp |  8 ++++----
+ frontend/ir/program.cpp              |  8 ++++++++
+ frontend/ir/program.h                |  2 ++
+ frontend/ir/value.h                  | 16 ++++++++++++++++
+ 6 files changed, 36 insertions(+), 5 deletions(-)
+
+diff --git a/backend/spirv/emit_spirv.cpp b/backend/spirv/emit_spirv.cpp
+index 08b3a81..73c127d 100644
+--- a/backend/spirv/emit_spirv.cpp
++++ b/backend/spirv/emit_spirv.cpp
+@@ -97,6 +97,10 @@ void Invoke(EmitContext& ctx, IR::Inst* inst) {
+ }
+ 
+ void EmitInst(EmitContext& ctx, IR::Inst* inst) {
++    if (inst->Ignored()) {
++        return;
++    }
++
+     switch (inst->GetOpcode()) {
+ #define OPCODE(name, result_type, ...)                                                             \
+     case IR::Opcode::name:                                                                         \
+@@ -480,6 +484,7 @@ void PatchPhiNodes(IR::Program& program, EmitContext& ctx) {
+ 
+ std::vector<u32> EmitSPIRV(const Profile& profile, const RuntimeInfo& runtime_info,
+                            IR::Program& program, Bindings& bindings) {
++    IR::ResetProgram(program);
+     EmitContext ctx{profile, runtime_info, program, bindings};
+     const Id main{DefineMain(ctx, program)};
+     DefineEntryPoint(program, ctx, main);
+diff --git a/backend/spirv/emit_spirv_image.cpp b/backend/spirv/emit_spirv_image.cpp
+index d18d5f1..e30b87c 100644
+--- a/backend/spirv/emit_spirv_image.cpp
++++ b/backend/spirv/emit_spirv_image.cpp
+@@ -221,7 +221,7 @@ Id Emit(MethodPtrType sparse_ptr, MethodPtrType non_sparse_ptr, EmitContext& ctx
+     const Id sample{(ctx.*sparse_ptr)(struct_type, std::forward<Args>(args)...)};
+     const Id resident_code{ctx.OpCompositeExtract(ctx.U32[1], sample, 0U)};
+     sparse->SetDefinition(ctx.OpImageSparseTexelsResident(ctx.U1, resident_code));
+-    sparse->Invalidate();
++    sparse->Ignore();
+     Decorate(ctx, inst, sample);
+     return ctx.OpCompositeExtract(result_type, sample, 1U);
+ }
+diff --git a/backend/spirv/emit_spirv_integer.cpp b/backend/spirv/emit_spirv_integer.cpp
+index 45a384e..ea86e13 100644
+--- a/backend/spirv/emit_spirv_integer.cpp
++++ b/backend/spirv/emit_spirv_integer.cpp
+@@ -13,7 +13,7 @@ void SetZeroFlag(EmitContext& ctx, IR::Inst* inst, Id result) {
+         return;
+     }
+     zero->SetDefinition(ctx.OpIEqual(ctx.U1, result, ctx.u32_zero_value));
+-    zero->Invalidate();
++    zero->Ignore();
+ }
+ 
+ void SetSignFlag(EmitContext& ctx, IR::Inst* inst, Id result) {
+@@ -22,7 +22,7 @@ void SetSignFlag(EmitContext& ctx, IR::Inst* inst, Id result) {
+         return;
+     }
+     sign->SetDefinition(ctx.OpSLessThan(ctx.U1, result, ctx.u32_zero_value));
+-    sign->Invalidate();
++    sign->Ignore();
+ }
+ } // Anonymous namespace
+ 
+@@ -35,7 +35,7 @@ Id EmitIAdd32(EmitContext& ctx, IR::Inst* inst, Id a, Id b) {
+ 
+         const Id carry_value{ctx.OpCompositeExtract(ctx.U32[1], carry_result, 1U)};
+         carry->SetDefinition(ctx.OpINotEqual(ctx.U1, carry_value, ctx.u32_zero_value));
+-        carry->Invalidate();
++        carry->Ignore();
+     } else {
+         result = ctx.OpIAdd(ctx.U32[1], a, b);
+     }
+@@ -51,7 +51,7 @@ Id EmitIAdd32(EmitContext& ctx, IR::Inst* inst, Id a, Id b) {
+         const Id negative_test{ctx.OpSLessThan(ctx.U1, b, sub_a)};
+         const Id carry_flag{ctx.OpSelect(ctx.U1, is_positive, positive_test, negative_test)};
+         overflow->SetDefinition(carry_flag);
+-        overflow->Invalidate();
++        overflow->Ignore();
+     }
+     return result;
+ }
+diff --git a/frontend/ir/program.cpp b/frontend/ir/program.cpp
+index 3fc06f8..0dbe1e4 100644
+--- a/frontend/ir/program.cpp
++++ b/frontend/ir/program.cpp
+@@ -29,4 +29,12 @@ std::string DumpProgram(const Program& program) {
+     return ret;
+ }
+ 
++void ResetProgram(Program& program) {
++    for (IR::Block* const block : program.blocks) {
++        for (IR::Inst& inst : block->Instructions()) {
++            inst.Reset();
++        }
++    }
++}
++
+ } // namespace Shader::IR
+diff --git a/frontend/ir/program.h b/frontend/ir/program.h
+index ebcaa8b..53e2cdd 100644
+--- a/frontend/ir/program.h
++++ b/frontend/ir/program.h
+@@ -32,4 +32,6 @@ struct Program {
+ 
+ [[nodiscard]] std::string DumpProgram(const Program& program);
+ 
++void ResetProgram(Program& program);
++
+ } // namespace Shader::IR
+diff --git a/frontend/ir/value.h b/frontend/ir/value.h
+index 14f6e55..ac7bdf2 100644
+--- a/frontend/ir/value.h
++++ b/frontend/ir/value.h
+@@ -234,6 +234,21 @@ public:
+         use_count += count;
+     }
+ 
++    /// Marks that the instruction should be ignored by the emitter
++    void Ignore() {
++        ignored = true;
++    }
++
++    bool Ignored() const {
++        return ignored;
++    }
++
++    /// Resets the instruction to it's pre-emission state
++    void Reset() {
++        ignored = false;
++        definition = 0;
++    }
++
+ private:
+     struct NonTriviallyDummy {
+         NonTriviallyDummy() noexcept {}
+@@ -252,6 +267,7 @@ private:
+         std::array<Value, 5> args;
+     };
+     std::unique_ptr<AssociatedInsts> associated_insts;
++    bool ignored{};
+ };
+ static_assert(sizeof(Inst) <= 128, "Inst size unintentionally increased");
+ 
+-- 
+2.35.1
+

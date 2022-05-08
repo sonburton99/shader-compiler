@@ -1,0 +1,45 @@
+From 420dc53762ce90b2a67c246ba971d83a69857598 Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Tue, 29 Mar 2022 22:01:08 +0100
+Subject: [PATCH 8/9] Fix sign extension for skyline bitfield replacement
+
+---
+ common/bit_field.h | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/common/bit_field.h b/common/bit_field.h
+index d43e9d0..63ec4ca 100644
+--- a/common/bit_field.h
++++ b/common/bit_field.h
+@@ -7,6 +7,8 @@
+ #include "bit_cast.h"
+ 
+ namespace Shader {
++    #pragma GCC diagnostic push
++    #pragma GCC diagnostic ignored "-Wbitfield-enum-conversion"
+     #pragma pack(push, 1)
+     template<size_t Start, size_t Count, typename Type>
+     struct BitField {
+@@ -25,7 +27,12 @@ namespace Shader {
+         }
+ 
+         constexpr Type Value() const {
+-            return static_cast<Type>(item >> PaddingBits);
++            // Use a bitfield to force sign extension on the value
++            struct SextHelper {
++                Type value : Count;
++            };
++
++            return SextHelper{static_cast<Type>(item >> PaddingBits)}.value;
+         }
+ 
+         constexpr operator Type() const {
+@@ -37,4 +44,5 @@ namespace Shader {
+         }
+     };
+     #pragma pack(pop)
++    #pragma GCC diagnostic pop
+ }
+-- 
+2.35.1
+
