@@ -1,0 +1,120 @@
+From d862c712ef0b4a22c8277c975a51339fc3301349 Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Tue, 2 Aug 2022 17:41:41 +0100
+Subject: [PATCH 1/2] Add a workaround for drivers where input_position needs
+ to be a struct
+
+Adreno drivers will crash in geometry shaders without this.
+---
+ backend/spirv/emit_spirv_context_get_set.cpp |  7 +++-
+ backend/spirv/spirv_emit_context.cpp         | 42 +++++++++++++++-----
+ backend/spirv/spirv_emit_context.h           |  1 +
+ profile.h                                    |  2 +
+ 4 files changed, 41 insertions(+), 11 deletions(-)
+
+diff --git a/backend/spirv/emit_spirv_context_get_set.cpp b/backend/spirv/emit_spirv_context_get_set.cpp
+index e022011..d320162 100644
+--- a/backend/spirv/emit_spirv_context_get_set.cpp
++++ b/backend/spirv/emit_spirv_context_get_set.cpp
+@@ -319,8 +319,11 @@ Id EmitGetAttribute(EmitContext& ctx, IR::Attribute attr, Id vertex) {
+     case IR::Attribute::PositionY:
+     case IR::Attribute::PositionZ:
+     case IR::Attribute::PositionW:
+-        return ctx.OpLoad(ctx.F32[1], AttrPointer(ctx, ctx.input_f32, vertex, ctx.input_position,
+-                                                  ctx.Const(element)));
++        return ctx.OpLoad(ctx.F32[1], ctx.need_input_position_indirect ?
++                                      AttrPointer(ctx, ctx.input_f32, vertex, ctx.input_position,
++                                                  ctx.u32_zero_value, ctx.Const(element))
++                                      : AttrPointer(ctx, ctx.input_f32, vertex, ctx.input_position,
++                                                    ctx.Const(element)));
+     case IR::Attribute::InstanceId:
+         if (ctx.profile.support_vertex_instance_id) {
+             return ctx.OpBitcast(ctx.F32[1], ctx.OpLoad(ctx.U32[1], ctx.instance_id));
+diff --git a/backend/spirv/spirv_emit_context.cpp b/backend/spirv/spirv_emit_context.cpp
+index c40b148..0dc9388 100644
+--- a/backend/spirv/spirv_emit_context.cpp
++++ b/backend/spirv/spirv_emit_context.cpp
+@@ -719,9 +719,21 @@ void EmitContext::DefineAttributeMemAccess(const Info& info) {
+         size_t label_index{0};
+         if (info.loads.AnyComponent(IR::Attribute::PositionX)) {
+             AddLabel(labels[label_index]);
+-            const Id pointer{is_array
+-                                 ? OpAccessChain(input_f32, input_position, vertex, masked_index)
+-                                 : OpAccessChain(input_f32, input_position, masked_index)};
++            const Id pointer{[&]() {
++                if (need_input_position_indirect) {
++                    if (is_array)
++                        return OpAccessChain(input_f32, input_position, vertex, u32_zero_value,
++                                             masked_index);
++                    else
++                        return OpAccessChain(input_f32, input_position, u32_zero_value,
++                                             masked_index);
++                }  else {
++                    if (is_array)
++                        return OpAccessChain(input_f32, input_position, vertex, masked_index);
++                    else
++                        return OpAccessChain(input_f32, input_position, masked_index);
++                }
++            }()};
+             const Id result{OpLoad(F32[1], pointer)};
+             OpReturnValue(result);
+             ++label_index;
+@@ -1324,12 +1336,24 @@ void EmitContext::DefineInputs(const IR::Program& program) {
+         primitive_id = DefineInput(*this, U32[1], false, spv::BuiltIn::PrimitiveId);
+     }
+     if (loads.AnyComponent(IR::Attribute::PositionX)) {
+-        const bool is_fragment{stage != Stage::Fragment};
+-        const spv::BuiltIn built_in{is_fragment ? spv::BuiltIn::Position : spv::BuiltIn::FragCoord};
+-        input_position = DefineInput(*this, F32[4], true, built_in);
+-        if (profile.support_geometry_shader_passthrough) {
+-            if (info.passthrough.AnyComponent(IR::Attribute::PositionX)) {
+-                Decorate(input_position, spv::Decoration::PassthroughNV);
++        const bool is_fragment{stage == Stage::Fragment};
++        if (!is_fragment && profile.has_broken_spirv_position_input) {
++            need_input_position_indirect = true;
++
++            const Id input_position_struct = TypeStruct(F32[4]);
++            input_position = DefineInput(*this, input_position_struct, true);
++
++            MemberDecorate(input_position_struct, 0, spv::Decoration::BuiltIn,
++                           static_cast<unsigned>(spv::BuiltIn::Position));
++            Decorate(input_position_struct, spv::Decoration::Block);
++        } else {
++            const spv::BuiltIn built_in{is_fragment ? spv::BuiltIn::FragCoord : spv::BuiltIn::Position};
++            input_position = DefineInput(*this, F32[4], true, built_in);
++
++            if (profile.support_geometry_shader_passthrough) {
++                if (info.passthrough.AnyComponent(IR::Attribute::PositionX)) {
++                    Decorate(input_position, spv::Decoration::PassthroughNV);
++                }
+             }
+         }
+     }
+diff --git a/backend/spirv/spirv_emit_context.h b/backend/spirv/spirv_emit_context.h
+index 6ed1934..de2de09 100644
+--- a/backend/spirv/spirv_emit_context.h
++++ b/backend/spirv/spirv_emit_context.h
+@@ -275,6 +275,7 @@ public:
+     Id write_global_func_u32x2{};
+     Id write_global_func_u32x4{};
+ 
++    bool need_input_position_indirect{};
+     Id input_position{};
+     std::array<Id, 32> input_generics{};
+ 
+diff --git a/profile.h b/profile.h
+index a6d3a64..fad5369 100644
+--- a/profile.h
++++ b/profile.h
+@@ -60,6 +60,8 @@ struct Profile {
+     bool has_broken_signed_operations{};
+     /// Float controls break when fp16 is enabled
+     bool has_broken_fp16_float_controls{};
++    /// When taking a variable decorated with 'Builtin Position' as input, some drivers will crash if it is not wrapped in a struct
++    bool has_broken_spirv_position_input{};
+     /// Dynamic vec4 indexing is broken on some OpenGL drivers
+     bool has_gl_component_indexing_bug{};
+     /// The precise type qualifier is broken in the fragment stage of some drivers
+-- 
+2.37.0
+
