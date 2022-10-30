@@ -1,0 +1,242 @@
+From 87ad0713095fc137798f967b92926c4b9043de65 Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Sun, 30 Oct 2022 19:23:59 +0000
+Subject: [PATCH] Implement emulation for {S,U}Scaled attributes
+
+---
+ backend/spirv/emit_spirv_context_get_set.cpp | 43 ++++++---------
+ backend/spirv/spirv_emit_context.cpp         | 55 +++++++++++++-------
+ backend/spirv/spirv_emit_context.h           | 16 +++++-
+ profile.h                                    |  1 +
+ runtime_info.h                               |  2 +
+ 5 files changed, 69 insertions(+), 48 deletions(-)
+
+diff --git a/backend/spirv/emit_spirv_context_get_set.cpp b/backend/spirv/emit_spirv_context_get_set.cpp
+index d320162..b1fa511 100644
+--- a/backend/spirv/emit_spirv_context_get_set.cpp
++++ b/backend/spirv/emit_spirv_context_get_set.cpp
+@@ -10,27 +10,6 @@
+ 
+ namespace Shader::Backend::SPIRV {
+ namespace {
+-struct AttrInfo {
+-    Id pointer;
+-    Id id;
+-    bool needs_cast;
+-};
+-
+-std::optional<AttrInfo> AttrTypes(EmitContext& ctx, u32 index) {
+-    const AttributeType type{ctx.runtime_info.generic_input_types.at(index)};
+-    switch (type) {
+-    case AttributeType::Float:
+-        return AttrInfo{ctx.input_f32, ctx.F32[1], false};
+-    case AttributeType::UnsignedInt:
+-        return AttrInfo{ctx.input_u32, ctx.U32[1], true};
+-    case AttributeType::SignedInt:
+-        return AttrInfo{ctx.input_s32, ctx.TypeInt(32, true), true};
+-    case AttributeType::Disabled:
+-        return std::nullopt;
+-    }
+-    throw InvalidArgument("Invalid attribute type {}", type);
+-}
+-
+ template <typename... Args>
+ Id AttrPointer(EmitContext& ctx, Id pointer_type, Id vertex, Id base, Args&&... args) {
+     switch (ctx.stage) {
+@@ -302,15 +281,25 @@ Id EmitGetAttribute(EmitContext& ctx, IR::Attribute attr, Id vertex) {
+     const u32 element{static_cast<u32>(attr) % 4};
+     if (IR::IsGeneric(attr)) {
+         const u32 index{IR::GenericAttributeIndex(attr)};
+-        const std::optional<AttrInfo> type{AttrTypes(ctx, index)};
+-        if (!type || !ctx.runtime_info.previous_stage_stores.Generic(index, element)) {
++        const auto& generic{ctx.input_generics.at(index)};
++        if (!ValidId(generic.id)) {
+             // Attribute is disabled or varying component is not written
+             return ctx.Const(element == 3 ? 1.0f : 0.0f);
+         }
+-        const Id generic_id{ctx.input_generics.at(index)};
+-        const Id pointer{AttrPointer(ctx, type->pointer, vertex, generic_id, ctx.Const(element))};
+-        const Id value{ctx.OpLoad(type->id, pointer)};
+-        return type->needs_cast ? ctx.OpBitcast(ctx.F32[1], value) : value;
++        const Id pointer{AttrPointer(ctx, generic.pointer_type, vertex, generic.id, ctx.Const(element))};
++        const Id value{ctx.OpLoad(generic.component_type, pointer)};
++        return [&ctx, generic, value]() {
++            switch (generic.load_op) {
++                case InputGenericLoadOp::Bitcast:
++                    return ctx.OpBitcast(ctx.F32[1], value);
++                case InputGenericLoadOp::SToF:
++                    return ctx.OpConvertSToF(ctx.F32[1], value);
++                case InputGenericLoadOp::UToF:
++                    return ctx.OpConvertUToF(ctx.F32[1], value);
++                default:
++                    return value;
++            };
++        }();
+     }
+     switch (attr) {
+     case IR::Attribute::PrimitiveId:
+diff --git a/backend/spirv/spirv_emit_context.cpp b/backend/spirv/spirv_emit_context.cpp
+index 0dc9388..3603bb0 100644
+--- a/backend/spirv/spirv_emit_context.cpp
++++ b/backend/spirv/spirv_emit_context.cpp
+@@ -25,12 +25,6 @@ enum class Operation {
+     FPMax,
+ };
+ 
+-struct AttrInfo {
+-    Id pointer;
+-    Id id;
+-    bool needs_cast;
+-};
+-
+ Id ImageType(EmitContext& ctx, const TextureDescriptor& desc) {
+     const spv::ImageFormat format{spv::ImageFormat::Unknown};
+     const Id type{ctx.F32[1]};
+@@ -204,23 +198,33 @@ Id GetAttributeType(EmitContext& ctx, AttributeType type) {
+         return ctx.TypeVector(ctx.TypeInt(32, true), 4);
+     case AttributeType::UnsignedInt:
+         return ctx.U32[4];
++    case AttributeType::SignedScaled:
++        return ctx.profile.support_scaled_attributes ? ctx.F32[4]
++                                                     : ctx.TypeVector(ctx.TypeInt(32, true), 4);
++    case AttributeType::UnsignedScaled:
++        return ctx.profile.support_scaled_attributes ? ctx.F32[4] : ctx.U32[4];
+     case AttributeType::Disabled:
+         break;
+     }
+     throw InvalidArgument("Invalid attribute type {}", type);
+ }
+ 
+-std::optional<AttrInfo> AttrTypes(EmitContext& ctx, u32 index) {
+-    const AttributeType type{ctx.runtime_info.generic_input_types.at(index)};
++InputGenericInfo GetAttributeInfo(EmitContext& ctx, AttributeType type, Id id) {
+     switch (type) {
+     case AttributeType::Float:
+-        return AttrInfo{ctx.input_f32, ctx.F32[1], false};
++        return InputGenericInfo{id, ctx.input_f32, ctx.F32[1], InputGenericLoadOp::None};
+     case AttributeType::UnsignedInt:
+-        return AttrInfo{ctx.input_u32, ctx.U32[1], true};
++        return InputGenericInfo{id, ctx.input_u32, ctx.U32[1], InputGenericLoadOp::Bitcast};
+     case AttributeType::SignedInt:
+-        return AttrInfo{ctx.input_s32, ctx.TypeInt(32, true), true};
++        return InputGenericInfo{id, ctx.input_s32, ctx.TypeInt(32, true), InputGenericLoadOp::Bitcast};
++    case AttributeType::SignedScaled:
++        return ctx.profile.support_scaled_attributes ? InputGenericInfo{id, ctx.input_f32, ctx.F32[1], InputGenericLoadOp::None}
++                                                     : InputGenericInfo{id, ctx.input_s32, ctx.TypeInt(32, true), InputGenericLoadOp::SToF};
++    case AttributeType::UnsignedScaled:
++        return ctx.profile.support_scaled_attributes ? InputGenericInfo{id, ctx.input_f32, ctx.F32[1], InputGenericLoadOp::None}
++                                                     : InputGenericInfo{id, ctx.input_u32, ctx.U32[1], InputGenericLoadOp::UToF};
+     case AttributeType::Disabled:
+-        return std::nullopt;
++        return InputGenericInfo{};
+     }
+     throw InvalidArgument("Invalid attribute type {}", type);
+ }
+@@ -743,18 +747,29 @@ void EmitContext::DefineAttributeMemAccess(const Info& info) {
+                 continue;
+             }
+             AddLabel(labels[label_index]);
+-            const auto type{AttrTypes(*this, static_cast<u32>(index))};
+-            if (!type) {
++            const auto &generic{input_generics.at(index)};
++            const Id generic_id{generic.id};
++            if (!ValidId(generic_id)) {
+                 OpReturnValue(Const(0.0f));
+                 ++label_index;
+                 continue;
+             }
+-            const Id generic_id{input_generics.at(index)};
+             const Id pointer{is_array
+-                                 ? OpAccessChain(type->pointer, generic_id, vertex, masked_index)
+-                                 : OpAccessChain(type->pointer, generic_id, masked_index)};
+-            const Id value{OpLoad(type->id, pointer)};
+-            const Id result{type->needs_cast ? OpBitcast(F32[1], value) : value};
++                                 ? OpAccessChain(generic.pointer_type, generic_id, vertex, masked_index)
++                                 : OpAccessChain(generic.pointer_type, generic_id, masked_index)};
++            const Id value{OpLoad(generic.component_type, pointer)};
++            const Id result{[this, generic, value]() {
++                switch (generic.load_op) {
++                    case InputGenericLoadOp::Bitcast:
++                        return OpBitcast(F32[1], value);
++                    case InputGenericLoadOp::SToF:
++                        return OpConvertSToF(F32[1], value);
++                    case InputGenericLoadOp::UToF:
++                        return OpConvertUToF(F32[1], value);
++                    default:
++                        return value;
++                };
++            }()};
+             OpReturnValue(result);
+             ++label_index;
+         }
+@@ -1398,7 +1413,7 @@ void EmitContext::DefineInputs(const IR::Program& program) {
+         const Id id{DefineInput(*this, type, true)};
+         Decorate(id, spv::Decoration::Location, static_cast<u32>(index));
+         Name(id, fmt::format("in_attr{}", index));
+-        input_generics[index] = id;
++        input_generics[index] = GetAttributeInfo(*this, input_type, id);
+ 
+         if (info.passthrough.Generic(index) && profile.support_geometry_shader_passthrough) {
+             Decorate(id, spv::Decoration::PassthroughNV);
+diff --git a/backend/spirv/spirv_emit_context.h b/backend/spirv/spirv_emit_context.h
+index de2de09..fcc4800 100644
+--- a/backend/spirv/spirv_emit_context.h
++++ b/backend/spirv/spirv_emit_context.h
+@@ -94,6 +94,20 @@ struct StorageDefinitions {
+     Id U32x4{};
+ };
+ 
++enum class InputGenericLoadOp {
++    None,
++    Bitcast,
++    SToF,
++    UToF,
++};
++
++struct InputGenericInfo {
++    Id id;
++    Id pointer_type;
++    Id component_type;
++    InputGenericLoadOp load_op;
++};
++
+ struct GenericElementInfo {
+     Id id{};
+     u32 first_element{};
+@@ -277,7 +291,7 @@ public:
+ 
+     bool need_input_position_indirect{};
+     Id input_position{};
+-    std::array<Id, 32> input_generics{};
++    std::array<InputGenericInfo, 32> input_generics{};
+ 
+     Id output_point_size{};
+     Id output_position{};
+diff --git a/profile.h b/profile.h
+index fad5369..e4e5b92 100644
+--- a/profile.h
++++ b/profile.h
+@@ -42,6 +42,7 @@ struct Profile {
+     bool support_gl_variable_aoffi{};
+     bool support_gl_sparse_textures{};
+     bool support_gl_derivative_control{};
++    bool support_scaled_attributes{};
+ 
+     bool warp_size_potentially_larger_than_guest{};
+ 
+diff --git a/runtime_info.h b/runtime_info.h
+index 8ddb368..38393eb 100644
+--- a/runtime_info.h
++++ b/runtime_info.h
+@@ -16,6 +16,8 @@ enum class AttributeType : u8 {
+     Float,
+     SignedInt,
+     UnsignedInt,
++    SignedScaled,
++    UnsignedScaled,
+     Disabled,
+ };
+ 
+-- 
+2.37.3
+
