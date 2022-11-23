@@ -1,0 +1,34 @@
+From 343e7f89225cb5f080a82a4059f49095cacee6f0 Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Thu, 4 Aug 2022 20:21:19 +0100
+Subject: [PATCH 09/14] Workaround image arg type error
+
+---
+ backend/spirv/emit_spirv_image.cpp | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/backend/spirv/emit_spirv_image.cpp b/backend/spirv/emit_spirv_image.cpp
+index fb5799c..c249c0f 100644
+--- a/backend/spirv/emit_spirv_image.cpp
++++ b/backend/spirv/emit_spirv_image.cpp
+@@ -168,7 +168,7 @@ Id Texture(EmitContext& ctx, IR::TextureInstInfo info, [[maybe_unused]] const IR
+ }
+ 
+ Id TextureImage(EmitContext& ctx, IR::TextureInstInfo info, const IR::Value& index) {
+-    if (!index.IsImmediate() || index.U32() != 0) {
++    if (index.Type() == IR::Type::U32 && (!index.IsImmediate() || index.U32() != 0)) {
+         throw NotImplementedException("Indirect image indexing");
+     }
+     if (info.type == TextureType::Buffer) {
+@@ -189,7 +189,7 @@ Id TextureImage(EmitContext& ctx, IR::TextureInstInfo info, const IR::Value& ind
+ }
+ 
+ Id Image(EmitContext& ctx, const IR::Value& index, IR::TextureInstInfo info) {
+-    if (!index.IsImmediate() || index.U32() != 0) {
++    if (index.Type() == IR::Type::U32 && (!index.IsImmediate() || index.U32() != 0)) {
+         throw NotImplementedException("Indirect image indexing");
+     }
+     if (info.type == TextureType::Buffer) {
+-- 
+2.38.1
+

@@ -1,7 +1,7 @@
-From 57444c274ae87614315ecdb7c1e42675cbe39928 Mon Sep 17 00:00:00 2001
+From 35060cb6e345e13cbafe9ac250a4b205b1f36757 Mon Sep 17 00:00:00 2001
 From: PixelyIon <pixelyion@protonmail.com>
 Date: Sun, 21 Nov 2021 15:06:09 +0530
-Subject: [PATCH 6/7] Implement Skyline Proxy Settings
+Subject: [PATCH 06/14] Implement Skyline Proxy Settings
 
 Settings values are to be handled by proxy as well by Skyline code, it was determined to do things in this manner it was rather pointless to have the settings struct which has been now eliminated and been replaced with a namespace of the same name.
 ---
@@ -52,5 +52,5 @@ index 3d3c225..c1f9ca7 100644
 +    static inline Values values{}; //!< A static structure with the values set by Skyline code
  }
 -- 
-2.35.1
+2.38.1
 

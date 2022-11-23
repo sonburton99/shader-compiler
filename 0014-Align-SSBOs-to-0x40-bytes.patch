@@ -1,0 +1,70 @@
+From 2881aec283c500099266d86c2b2fd9dec94b1648 Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Sat, 19 Nov 2022 15:53:45 +0000
+Subject: [PATCH 14/14] Align SSBOs to 0x40 bytes
+
+---
+ .../global_memory_to_storage_buffer_pass.cpp  | 21 +++++++++++--------
+ 1 file changed, 12 insertions(+), 9 deletions(-)
+
+diff --git a/ir_opt/global_memory_to_storage_buffer_pass.cpp b/ir_opt/global_memory_to_storage_buffer_pass.cpp
+index 336338e..0f8f84c 100644
+--- a/ir_opt/global_memory_to_storage_buffer_pass.cpp
++++ b/ir_opt/global_memory_to_storage_buffer_pass.cpp
+@@ -1,17 +1,18 @@
+ // SPDX-FileCopyrightText: Copyright 2021 yuzu Emulator Project
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ 
++#include <range/v3/algorithm.hpp>
+ #include <optional>
+ 
+ #include <boost/container/flat_set.hpp>
+ #include <boost/container/small_vector.hpp>
+ 
+-#include "common/alignment.h"
+-#include "shader_recompiler/frontend/ir/basic_block.h"
+-#include "shader_recompiler/frontend/ir/breadth_first_search.h"
+-#include "shader_recompiler/frontend/ir/ir_emitter.h"
+-#include "shader_recompiler/frontend/ir/value.h"
+-#include "shader_recompiler/ir_opt/passes.h"
++#include <shader_compiler/common/alignment.h>
++#include <shader_compiler/frontend/ir/basic_block.h>
++#include <shader_compiler/frontend/ir/breadth_first_search.h>
++#include <shader_compiler/frontend/ir/ir_emitter.h>
++#include <shader_compiler/frontend/ir/value.h>
++#include <shader_compiler/ir_opt/passes.h>
+ 
+ namespace Shader::Optimization {
+ namespace {
+@@ -415,7 +416,9 @@ IR::U32 StorageOffset(IR::Block& block, IR::Inst& inst, StorageBufferAddr buffer
+     }
+     // Subtract the least significant 32 bits from the guest offset. The result is the storage
+     // buffer offset in bytes.
+-    const IR::U32 low_cbuf{ir.GetCbuf(ir.Imm32(buffer.index), ir.Imm32(buffer.offset))};
++    IR::U32 low_cbuf{ir.GetCbuf(ir.Imm32(buffer.index), ir.Imm32(buffer.offset))};
++    low_cbuf = ir.BitwiseAnd(low_cbuf, ir.Imm32(~(0x40U - 1U)));
++
+     return ir.ISub(offset, low_cbuf);
+ }
+ 
+@@ -542,7 +545,7 @@ void GlobalMemoryToStorageBufferPass(IR::Program& program) {
+ template <typename Descriptors, typename Descriptor, typename Func>
+ static u32 Add(Descriptors& descriptors, const Descriptor& desc, Func&& pred) {
+     // TODO: Handle arrays
+-    const auto it{std::ranges::find_if(descriptors, pred)};
++    const auto it{ranges::find_if(descriptors, pred)};
+     if (it != descriptors.end()) {
+         return static_cast<u32>(std::distance(descriptors.begin(), it));
+     }
+@@ -553,7 +556,7 @@ static u32 Add(Descriptors& descriptors, const Descriptor& desc, Func&& pred) {
+ void JoinStorageInfo(Info& base, Info& source) {
+     auto& descriptors = base.storage_buffers_descriptors;
+     for (auto& desc : source.storage_buffers_descriptors) {
+-        auto it{std::ranges::find_if(descriptors, [&desc](const auto& existing) {
++        auto it{ranges::find_if(descriptors, [&desc](const auto& existing) {
+             return desc.cbuf_index == existing.cbuf_index &&
+                    desc.cbuf_offset == existing.cbuf_offset && desc.count == existing.count;
+         })};
+-- 
+2.38.1
+

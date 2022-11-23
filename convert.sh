@@ -17,6 +17,4 @@ for i in `grep -rl 'std::ranges' --exclude-dir={.git,skyline-conversion}`; do
     gawk -i inplace '!found && /include/ { print "#include <range/v3/algorithm.hpp>"; found=1 } 1' $i
 done
 
-sed -i 's/ranges::sort(encodings, \[\](const InstEncoding& lhs, const InstEncoding& rhs) {/std::sort(encodings.begin(), encodings.end(), \[\](const InstEncoding& lhs, const InstEncoding& rhs) {/g' frontend/maxwell/decode.cpp
-
 

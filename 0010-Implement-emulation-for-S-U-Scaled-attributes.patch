@@ -1,18 +1,18 @@
-From 87ad0713095fc137798f967b92926c4b9043de65 Mon Sep 17 00:00:00 2001
+From a144332a5b478c19394bbe2d104547c74d7a1381 Mon Sep 17 00:00:00 2001
 From: Billy Laws <blaws05@gmail.com>
 Date: Sun, 30 Oct 2022 19:23:59 +0000
-Subject: [PATCH] Implement emulation for {S,U}Scaled attributes
+Subject: [PATCH 10/14] Implement emulation for {S,U}Scaled attributes
 
 ---
  backend/spirv/emit_spirv_context_get_set.cpp | 43 ++++++---------
  backend/spirv/spirv_emit_context.cpp         | 55 +++++++++++++-------
  backend/spirv/spirv_emit_context.h           | 16 +++++-
- profile.h                                    |  1 +
+ profile.h                                    |  3 ++
  runtime_info.h                               |  2 +
- 5 files changed, 69 insertions(+), 48 deletions(-)
+ 5 files changed, 71 insertions(+), 48 deletions(-)
 
 diff --git a/backend/spirv/emit_spirv_context_get_set.cpp b/backend/spirv/emit_spirv_context_get_set.cpp
-index d320162..b1fa511 100644
+index a1ae716..3d1af0f 100644
 --- a/backend/spirv/emit_spirv_context_get_set.cpp
 +++ b/backend/spirv/emit_spirv_context_get_set.cpp
 @@ -10,27 +10,6 @@
@@ -76,7 +76,7 @@ index d320162..b1fa511 100644
      switch (attr) {
      case IR::Attribute::PrimitiveId:
 diff --git a/backend/spirv/spirv_emit_context.cpp b/backend/spirv/spirv_emit_context.cpp
-index 0dc9388..3603bb0 100644
+index 8250500..73f229c 100644
 --- a/backend/spirv/spirv_emit_context.cpp
 +++ b/backend/spirv/spirv_emit_context.cpp
 @@ -25,12 +25,6 @@ enum class Operation {
@@ -92,7 +92,7 @@ index 0dc9388..3603bb0 100644
  Id ImageType(EmitContext& ctx, const TextureDescriptor& desc) {
      const spv::ImageFormat format{spv::ImageFormat::Unknown};
      const Id type{ctx.F32[1]};
-@@ -204,23 +198,33 @@ Id GetAttributeType(EmitContext& ctx, AttributeType type) {
+@@ -205,23 +199,33 @@ Id GetAttributeType(EmitContext& ctx, AttributeType type) {
          return ctx.TypeVector(ctx.TypeInt(32, true), 4);
      case AttributeType::UnsignedInt:
          return ctx.U32[4];
@@ -132,7 +132,7 @@ index 0dc9388..3603bb0 100644
      }
      throw InvalidArgument("Invalid attribute type {}", type);
  }
-@@ -743,18 +747,29 @@ void EmitContext::DefineAttributeMemAccess(const Info& info) {
+@@ -745,18 +749,29 @@ void EmitContext::DefineAttributeMemAccess(const Info& info) {
                  continue;
              }
              AddLabel(labels[label_index]);
@@ -169,7 +169,7 @@ index 0dc9388..3603bb0 100644
              OpReturnValue(result);
              ++label_index;
          }
-@@ -1398,7 +1413,7 @@ void EmitContext::DefineInputs(const IR::Program& program) {
+@@ -1439,7 +1454,7 @@ void EmitContext::DefineInputs(const IR::Program& program) {
          const Id id{DefineInput(*this, type, true)};
          Decorate(id, spv::Decoration::Location, static_cast<u32>(index));
          Name(id, fmt::format("in_attr{}", index));
@@ -179,7 +179,7 @@ index 0dc9388..3603bb0 100644
          if (info.passthrough.Generic(index) && profile.support_geometry_shader_passthrough) {
              Decorate(id, spv::Decoration::PassthroughNV);
 diff --git a/backend/spirv/spirv_emit_context.h b/backend/spirv/spirv_emit_context.h
-index de2de09..fcc4800 100644
+index a50df0d..564e26b 100644
 --- a/backend/spirv/spirv_emit_context.h
 +++ b/backend/spirv/spirv_emit_context.h
 @@ -94,6 +94,20 @@ struct StorageDefinitions {
@@ -203,7 +203,7 @@ index de2de09..fcc4800 100644
  struct GenericElementInfo {
      Id id{};
      u32 first_element{};
-@@ -277,7 +291,7 @@ public:
+@@ -281,7 +295,7 @@ public:
  
      bool need_input_position_indirect{};
      Id input_position{};
@@ -213,7 +213,7 @@ index de2de09..fcc4800 100644
      Id output_point_size{};
      Id output_position{};
 diff --git a/profile.h b/profile.h
-index fad5369..e4e5b92 100644
+index 21d3d23..ceae34a 100644
 --- a/profile.h
 +++ b/profile.h
 @@ -42,6 +42,7 @@ struct Profile {
@@ -224,11 +224,20 @@ index fad5369..e4e5b92 100644
  
      bool warp_size_potentially_larger_than_guest{};
  
+@@ -60,6 +61,8 @@ struct Profile {
+     bool has_broken_signed_operations{};
+     /// Float controls break when fp16 is enabled
+     bool has_broken_fp16_float_controls{};
++    /// When taking a variable decorated with 'Builtin Position' as input, some drivers will crash if it is not wrapped in a struct
++    bool has_broken_spirv_position_input{};
+     /// Dynamic vec4 indexing is broken on some OpenGL drivers
+     bool has_gl_component_indexing_bug{};
+     /// The precise type qualifier is broken in the fragment stage of some drivers
 diff --git a/runtime_info.h b/runtime_info.h
-index 8ddb368..38393eb 100644
+index 549b81e..3b63c24 100644
 --- a/runtime_info.h
 +++ b/runtime_info.h
-@@ -16,6 +16,8 @@ enum class AttributeType : u8 {
+@@ -17,6 +17,8 @@ enum class AttributeType : u8 {
      Float,
      SignedInt,
      UnsignedInt,
@@ -238,5 +247,5 @@ index 8ddb368..38393eb 100644
  };
  
 -- 
-2.37.3
+2.38.1
 

@@ -1,0 +1,83 @@
+From 00bfdcf8de7d1ed00f718b3bc7a75c5f141676cd Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Fri, 21 Oct 2022 22:58:37 +0100
+Subject: [PATCH 12/14] Add comparison operators to descriptor types
+
+---
+ shader_info.h | 18 +++++++++++++++---
+ 1 file changed, 15 insertions(+), 3 deletions(-)
+
+diff --git a/shader_info.h b/shader_info.h
+index ee6252b..cb809cb 100644
+--- a/shader_info.h
++++ b/shader_info.h
+@@ -7,9 +7,9 @@
+ #include <bitset>
+ #include <map>
+ 
+-#include "common/common_types.h"
+-#include "shader_recompiler/frontend/ir/type.h"
+-#include "shader_recompiler/varying_state.h"
++#include <shader_compiler/common/common_types.h>
++#include <shader_compiler/frontend/ir/type.h>
++#include <shader_compiler/varying_state.h>
+ 
+ #include <boost/container/small_vector.hpp>
+ #include <boost/container/static_vector.hpp>
+@@ -59,6 +59,8 @@ enum class Interpolation {
+ struct ConstantBufferDescriptor {
+     u32 index;
+     u32 count;
++
++    auto operator<=>(const ConstantBufferDescriptor&) const = default;
+ };
+ 
+ struct StorageBufferDescriptor {
+@@ -66,6 +68,8 @@ struct StorageBufferDescriptor {
+     u32 cbuf_offset;
+     u32 count;
+     bool is_written;
++
++    auto operator<=>(const StorageBufferDescriptor&) const = default;
+ };
+ 
+ struct TextureBufferDescriptor {
+@@ -78,6 +82,8 @@ struct TextureBufferDescriptor {
+     u32 secondary_shift_left;
+     u32 count;
+     u32 size_shift;
++
++    auto operator<=>(const TextureBufferDescriptor&) const = default;
+ };
+ using TextureBufferDescriptors = boost::container::small_vector<TextureBufferDescriptor, 6>;
+ 
+@@ -89,6 +95,8 @@ struct ImageBufferDescriptor {
+     u32 cbuf_offset;
+     u32 count;
+     u32 size_shift;
++
++    auto operator<=>(const ImageBufferDescriptor&) const = default;
+ };
+ using ImageBufferDescriptors = boost::container::small_vector<ImageBufferDescriptor, 2>;
+ 
+@@ -104,6 +112,8 @@ struct TextureDescriptor {
+     u32 secondary_shift_left;
+     u32 count;
+     u32 size_shift;
++
++    auto operator<=>(const TextureDescriptor&) const = default;
+ };
+ using TextureDescriptors = boost::container::small_vector<TextureDescriptor, 12>;
+ 
+@@ -116,6 +126,8 @@ struct ImageDescriptor {
+     u32 cbuf_offset;
+     u32 count;
+     u32 size_shift;
++
++    auto operator<=>(const ImageDescriptor&) const = default;
+ };
+ using ImageDescriptors = boost::container::small_vector<ImageDescriptor, 4>;
+ 
+-- 
+2.38.1
+

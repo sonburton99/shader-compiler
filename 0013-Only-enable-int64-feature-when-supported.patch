@@ -1,0 +1,40 @@
+From de5b5bf8f79140d4987ff9ce4fb3cb855cc06111 Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Sat, 19 Nov 2022 15:53:19 +0000
+Subject: [PATCH 13/14] Only enable int64 feature when supported
+
+---
+ backend/spirv/spirv_emit_context.cpp | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/backend/spirv/spirv_emit_context.cpp b/backend/spirv/spirv_emit_context.cpp
+index 73f229c..c230193 100644
+--- a/backend/spirv/spirv_emit_context.cpp
++++ b/backend/spirv/spirv_emit_context.cpp
+@@ -10,10 +10,10 @@
+ 
+ #include <fmt/format.h>
+ 
+-#include "common/common_types.h"
+-#include "common/div_ceil.h"
+-#include "shader_recompiler/backend/spirv/emit_spirv.h"
+-#include "shader_recompiler/backend/spirv/spirv_emit_context.h"
++#include <shader_compiler/common/common_types.h>
++#include <shader_compiler/common/div_ceil.h>
++#include <shader_compiler/backend/spirv/emit_spirv.h>
++#include <shader_compiler/backend/spirv/spirv_emit_context.h>
+ 
+ namespace Shader::Backend::SPIRV {
+ namespace {
+@@ -548,7 +548,7 @@ void EmitContext::DefineCommonTypes(const Info& info) {
+         U16 = Name(TypeInt(16, false), "u16");
+         S16 = Name(TypeInt(16, true), "s16");
+     }
+-    if (info.uses_int64) {
++    if (info.uses_int64 && profile.support_int64) {
+         AddCapability(spv::Capability::Int64);
+         U64 = Name(TypeInt(64, false), "u64");
+     }
+-- 
+2.38.1
+

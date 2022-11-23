@@ -1,7 +1,7 @@
-From d862c712ef0b4a22c8277c975a51339fc3301349 Mon Sep 17 00:00:00 2001
+From ceb3ca0aca585b6b890b4395f849ede12b36d20f Mon Sep 17 00:00:00 2001
 From: Billy Laws <blaws05@gmail.com>
 Date: Tue, 2 Aug 2022 17:41:41 +0100
-Subject: [PATCH 1/2] Add a workaround for drivers where input_position needs
+Subject: [PATCH 08/14] Add a workaround for drivers where input_position needs
  to be a struct
 
 Adreno drivers will crash in geometry shaders without this.
@@ -9,14 +9,13 @@ Adreno drivers will crash in geometry shaders without this.
  backend/spirv/emit_spirv_context_get_set.cpp |  7 +++-
  backend/spirv/spirv_emit_context.cpp         | 42 +++++++++++++++-----
  backend/spirv/spirv_emit_context.h           |  1 +
- profile.h                                    |  2 +
- 4 files changed, 41 insertions(+), 11 deletions(-)
+ 3 files changed, 39 insertions(+), 11 deletions(-)
 
 diff --git a/backend/spirv/emit_spirv_context_get_set.cpp b/backend/spirv/emit_spirv_context_get_set.cpp
-index e022011..d320162 100644
+index 01f6ec9..a1ae716 100644
 --- a/backend/spirv/emit_spirv_context_get_set.cpp
 +++ b/backend/spirv/emit_spirv_context_get_set.cpp
-@@ -319,8 +319,11 @@ Id EmitGetAttribute(EmitContext& ctx, IR::Attribute attr, Id vertex) {
+@@ -321,8 +321,11 @@ Id EmitGetAttribute(EmitContext& ctx, IR::Attribute attr, Id vertex) {
      case IR::Attribute::PositionY:
      case IR::Attribute::PositionZ:
      case IR::Attribute::PositionW:
@@ -31,10 +30,10 @@ index e022011..d320162 100644
          if (ctx.profile.support_vertex_instance_id) {
              return ctx.OpBitcast(ctx.F32[1], ctx.OpLoad(ctx.U32[1], ctx.instance_id));
 diff --git a/backend/spirv/spirv_emit_context.cpp b/backend/spirv/spirv_emit_context.cpp
-index c40b148..0dc9388 100644
+index 8e3e40c..8250500 100644
 --- a/backend/spirv/spirv_emit_context.cpp
 +++ b/backend/spirv/spirv_emit_context.cpp
-@@ -719,9 +719,21 @@ void EmitContext::DefineAttributeMemAccess(const Info& info) {
+@@ -721,9 +721,21 @@ void EmitContext::DefineAttributeMemAccess(const Info& info) {
          size_t label_index{0};
          if (info.loads.AnyComponent(IR::Attribute::PositionX)) {
              AddLabel(labels[label_index]);
@@ -59,8 +58,8 @@ index c40b148..0dc9388 100644
              const Id result{OpLoad(F32[1], pointer)};
              OpReturnValue(result);
              ++label_index;
-@@ -1324,12 +1336,24 @@ void EmitContext::DefineInputs(const IR::Program& program) {
-         primitive_id = DefineInput(*this, U32[1], false, spv::BuiltIn::PrimitiveId);
+@@ -1365,12 +1377,24 @@ void EmitContext::DefineInputs(const IR::Program& program) {
+         Decorate(layer, spv::Decoration::Flat);
      }
      if (loads.AnyComponent(IR::Attribute::PositionX)) {
 -        const bool is_fragment{stage != Stage::Fragment};
@@ -91,10 +90,10 @@ index c40b148..0dc9388 100644
          }
      }
 diff --git a/backend/spirv/spirv_emit_context.h b/backend/spirv/spirv_emit_context.h
-index 6ed1934..de2de09 100644
+index dde45b4..a50df0d 100644
 --- a/backend/spirv/spirv_emit_context.h
 +++ b/backend/spirv/spirv_emit_context.h
-@@ -275,6 +275,7 @@ public:
+@@ -279,6 +279,7 @@ public:
      Id write_global_func_u32x2{};
      Id write_global_func_u32x4{};
  
@@ -102,19 +101,6 @@ index 6ed1934..de2de09 100644
      Id input_position{};
      std::array<Id, 32> input_generics{};
  
-diff --git a/profile.h b/profile.h
-index a6d3a64..fad5369 100644
---- a/profile.h
-+++ b/profile.h
-@@ -60,6 +60,8 @@ struct Profile {
-     bool has_broken_signed_operations{};
-     /// Float controls break when fp16 is enabled
-     bool has_broken_fp16_float_controls{};
-+    /// When taking a variable decorated with 'Builtin Position' as input, some drivers will crash if it is not wrapped in a struct
-+    bool has_broken_spirv_position_input{};
-     /// Dynamic vec4 indexing is broken on some OpenGL drivers
-     bool has_gl_component_indexing_bug{};
-     /// The precise type qualifier is broken in the fragment stage of some drivers
 -- 
-2.37.0
+2.38.1
 

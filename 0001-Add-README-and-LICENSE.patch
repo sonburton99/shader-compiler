@@ -1,7 +1,7 @@
-From 12cc2d668c958fbfc6d1d5713383c2a4b8acd86a Mon Sep 17 00:00:00 2001
+From 872b06a52b6d77c4d26a05966bc52c050cca6572 Mon Sep 17 00:00:00 2001
 From: PixelyIon <pixelyion@protonmail.com>
 Date: Thu, 18 Nov 2021 15:42:11 +0530
-Subject: [PATCH 1/7] Add README and LICENSE
+Subject: [PATCH 01/14] Add README and LICENSE
 
 ---
  LICENSE.md | 355 +++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -383,5 +383,5 @@ index 0000000..ccbce0d
 +### Licensing
 +Hades is licensed under [Mozilla Public License, version 2.0](LICENSE.md) as stated by the terms of the [license exemption granted by *yuzu* contributors](https://github.com/yuzu-emu/yuzu#license).
 -- 
-2.35.1
+2.38.1
 
