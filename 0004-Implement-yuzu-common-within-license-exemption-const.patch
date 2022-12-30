@@ -1,7 +1,7 @@
-From 42eddd2714964fa670130004b9c6d6430c7b893d Mon Sep 17 00:00:00 2001
+From 00c3bac4185ef77748e7a08ea45fa9e839a8e3df Mon Sep 17 00:00:00 2001
 From: PixelyIon <pixelyion@protonmail.com>
 Date: Sat, 20 Nov 2021 22:02:00 +0530
-Subject: [PATCH 04/14] Implement yuzu `common` within license exemption
+Subject: [PATCH 04/15] Implement yuzu `common` within license exemption
  constraints
 
 The shader compiler use a subset of yuzu's `common`, this contains a lot of GPL code that isn't covered under our exemptions so we needed to selectively reimplement parts of it alongside certain parts that just don't map to Skyline such as `Settings`.
@@ -34,10 +34,10 @@ The shader compiler use a subset of yuzu's `common`, this contains a lot of GPL 
  create mode 100644 common/settings.h
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index ba0d3c1..c911756 100644
+index 0956948..2af7ff7 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -237,7 +237,7 @@ add_library(shader_recompiler STATIC
+@@ -239,7 +239,7 @@ add_library(shader_recompiler STATIC
      varying_state.h
  )
  

@@ -1,7 +1,7 @@
-From 4b175a141cd167439eb45d13ed2a1375e7f1b7e4 Mon Sep 17 00:00:00 2001
+From f9f48f2b03a42664e96847bde38191c976fa8bbe Mon Sep 17 00:00:00 2001
 From: Billy Laws <blaws05@gmail.com>
 Date: Tue, 2 Aug 2022 17:41:41 +0100
-Subject: [PATCH 08/14] Add a workaround for drivers where input_position needs
+Subject: [PATCH 08/15] Add a workaround for drivers where input_position needs
  to be a struct
 
 Adreno drivers will crash in geometry shaders without this.
@@ -12,7 +12,7 @@ Adreno drivers will crash in geometry shaders without this.
  3 files changed, 39 insertions(+), 11 deletions(-)
 
 diff --git a/backend/spirv/emit_spirv_context_get_set.cpp b/backend/spirv/emit_spirv_context_get_set.cpp
-index 01f6ec9..a1ae716 100644
+index 73b67f0..122643b 100644
 --- a/backend/spirv/emit_spirv_context_get_set.cpp
 +++ b/backend/spirv/emit_spirv_context_get_set.cpp
 @@ -321,8 +321,11 @@ Id EmitGetAttribute(EmitContext& ctx, IR::Attribute attr, Id vertex) {
@@ -30,7 +30,7 @@ index 01f6ec9..a1ae716 100644
          if (ctx.profile.support_vertex_instance_id) {
              return ctx.OpBitcast(ctx.F32[1], ctx.OpLoad(ctx.U32[1], ctx.instance_id));
 diff --git a/backend/spirv/spirv_emit_context.cpp b/backend/spirv/spirv_emit_context.cpp
-index 8e3e40c..8250500 100644
+index 41dc6d0..7bc8741 100644
 --- a/backend/spirv/spirv_emit_context.cpp
 +++ b/backend/spirv/spirv_emit_context.cpp
 @@ -721,9 +721,21 @@ void EmitContext::DefineAttributeMemAccess(const Info& info) {
@@ -58,7 +58,7 @@ index 8e3e40c..8250500 100644
              const Id result{OpLoad(F32[1], pointer)};
              OpReturnValue(result);
              ++label_index;
-@@ -1365,12 +1377,24 @@ void EmitContext::DefineInputs(const IR::Program& program) {
+@@ -1367,12 +1379,24 @@ void EmitContext::DefineInputs(const IR::Program& program) {
          Decorate(layer, spv::Decoration::Flat);
      }
      if (loads.AnyComponent(IR::Attribute::PositionX)) {

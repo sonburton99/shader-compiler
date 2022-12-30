@@ -1,7 +1,7 @@
-From 6a47f6b5823a2000a2f8bb7d9e6a9a4447b714b3 Mon Sep 17 00:00:00 2001
+From 5d229b0d3af592a165b1dbef556d973f74658592 Mon Sep 17 00:00:00 2001
 From: Billy Laws <blaws05@gmail.com>
 Date: Sun, 30 Oct 2022 19:23:59 +0000
-Subject: [PATCH 10/14] Implement emulation for {S,U}Scaled attributes
+Subject: [PATCH 10/15] Implement emulation for {S,U}Scaled attributes
 
 ---
  backend/spirv/emit_spirv_context_get_set.cpp | 43 ++++++---------
@@ -12,7 +12,7 @@ Subject: [PATCH 10/14] Implement emulation for {S,U}Scaled attributes
  5 files changed, 71 insertions(+), 48 deletions(-)
 
 diff --git a/backend/spirv/emit_spirv_context_get_set.cpp b/backend/spirv/emit_spirv_context_get_set.cpp
-index a1ae716..3d1af0f 100644
+index 122643b..b25d086 100644
 --- a/backend/spirv/emit_spirv_context_get_set.cpp
 +++ b/backend/spirv/emit_spirv_context_get_set.cpp
 @@ -10,27 +10,6 @@
@@ -76,7 +76,7 @@ index a1ae716..3d1af0f 100644
      switch (attr) {
      case IR::Attribute::PrimitiveId:
 diff --git a/backend/spirv/spirv_emit_context.cpp b/backend/spirv/spirv_emit_context.cpp
-index 8250500..73f229c 100644
+index 7bc8741..d59b16c 100644
 --- a/backend/spirv/spirv_emit_context.cpp
 +++ b/backend/spirv/spirv_emit_context.cpp
 @@ -25,12 +25,6 @@ enum class Operation {
@@ -169,7 +169,7 @@ index 8250500..73f229c 100644
              OpReturnValue(result);
              ++label_index;
          }
-@@ -1439,7 +1454,7 @@ void EmitContext::DefineInputs(const IR::Program& program) {
+@@ -1441,7 +1456,7 @@ void EmitContext::DefineInputs(const IR::Program& program) {
          const Id id{DefineInput(*this, type, true)};
          Decorate(id, spv::Decoration::Location, static_cast<u32>(index));
          Name(id, fmt::format("in_attr{}", index));
@@ -213,10 +213,10 @@ index a50df0d..564e26b 100644
      Id output_point_size{};
      Id output_position{};
 diff --git a/profile.h b/profile.h
-index 21d3d23..ceae34a 100644
+index b8841a5..c166d01 100644
 --- a/profile.h
 +++ b/profile.h
-@@ -42,6 +42,7 @@ struct Profile {
+@@ -43,6 +43,7 @@ struct Profile {
      bool support_gl_variable_aoffi{};
      bool support_gl_sparse_textures{};
      bool support_gl_derivative_control{};
@@ -224,7 +224,7 @@ index 21d3d23..ceae34a 100644
  
      bool warp_size_potentially_larger_than_guest{};
  
-@@ -60,6 +61,8 @@ struct Profile {
+@@ -61,6 +62,8 @@ struct Profile {
      bool has_broken_signed_operations{};
      /// Float controls break when fp16 is enabled
      bool has_broken_fp16_float_controls{};

@@ -1,0 +1,55 @@
+From 7cbe66c19d0ce505bc234d54b2498075a719478b Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Fri, 30 Dec 2022 13:40:27 +0000
+Subject: [PATCH 14/15] Add workaround for drivers with partially-broken
+ OpVectorExtractDynamic
+
+---
+ backend/spirv/emit_spirv_warp.cpp | 17 ++++++++++++++++-
+ profile.h                         |  2 ++
+ 2 files changed, 18 insertions(+), 1 deletion(-)
+
+diff --git a/backend/spirv/emit_spirv_warp.cpp b/backend/spirv/emit_spirv_warp.cpp
+index 2c90f23..27196f6 100644
+--- a/backend/spirv/emit_spirv_warp.cpp
++++ b/backend/spirv/emit_spirv_warp.cpp
+@@ -17,7 +17,22 @@ Id GetThreadId(EmitContext& ctx) {
+ Id WarpExtract(EmitContext& ctx, Id value) {
+     const Id thread_id{GetThreadId(ctx)};
+     const Id local_index{ctx.OpShiftRightArithmetic(ctx.U32[1], thread_id, ctx.Const(5U))};
+-    return ctx.OpVectorExtractDynamic(ctx.U32[1], value, local_index);
++    if (ctx.profile.has_broken_spirv_subgroup_mask_vector_extract_dynamic) {
++        const Id c0_sel{ctx.OpSelect(ctx.U32[1], ctx.OpIEqual(ctx.U1, local_index, ctx.Const(0U)),
++                                     ctx.OpCompositeExtract(ctx.U32[1], value, 0U), ctx.Const(0U))};
++        const Id c1_sel{ctx.OpSelect(ctx.U32[1], ctx.OpIEqual(ctx.U1, local_index, ctx.Const(1U)),
++                                     ctx.OpCompositeExtract(ctx.U32[1], value, 1U), ctx.Const(0U))};
++        const Id c2_sel{ctx.OpSelect(ctx.U32[1], ctx.OpIEqual(ctx.U1, local_index, ctx.Const(2U)),
++                                     ctx.OpCompositeExtract(ctx.U32[1], value, 2U), ctx.Const(0U))};
++        const Id c3_sel{ctx.OpSelect(ctx.U32[1], ctx.OpIEqual(ctx.U1, local_index, ctx.Const(3U)),
++                                     ctx.OpCompositeExtract(ctx.U32[1], value, 3U), ctx.Const(0U))};
++        const Id c0_or_c1{ctx.OpBitwiseOr(ctx.U32[1], c0_sel, c1_sel)};
++        const Id c2_or_c3{ctx.OpBitwiseOr(ctx.U32[1], c2_sel, c3_sel)};
++        const Id c0_or_c1_or_c2_or_c3{ctx.OpBitwiseOr(ctx.U32[1], c0_or_c1, c2_or_c3)};
++        return c0_or_c1_or_c2_or_c3;
++    } else {
++        return ctx.OpVectorExtractDynamic(ctx.U32[1], value, local_index);
++    }
+ }
+ 
+ Id LoadMask(EmitContext& ctx, Id mask) {
+diff --git a/profile.h b/profile.h
+index c166d01..c7221c2 100644
+--- a/profile.h
++++ b/profile.h
+@@ -74,6 +74,8 @@ struct Profile {
+     bool has_gl_bool_ref_bug{};
+     /// Ignores SPIR-V ordered vs unordered using GLSL semantics
+     bool ignore_nan_fp_comparisons{};
++    /// Some drivers have broken support for OpVectorExtractDynamic on subgroup mask inputs
++    bool has_broken_spirv_subgroup_mask_vector_extract_dynamic{};
+ 
+     u32 gl_max_compute_smem_size{};
+ };
+-- 
+2.38.1
+

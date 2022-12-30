@@ -1,7 +1,7 @@
-From 6c725ef53a8ff17363deb1477d5e7027f452aa5a Mon Sep 17 00:00:00 2001
+From 22fbe8d34945cd1fabdb3764938a601032921c31 Mon Sep 17 00:00:00 2001
 From: PixelyIon <pixelyion@protonmail.com>
 Date: Sat, 20 Nov 2021 12:55:51 +0530
-Subject: [PATCH 02/14] Allow building using `add_subdirectory` with base CMake
+Subject: [PATCH 02/15] Allow building using `add_subdirectory` with base CMake
 
 yuzu defines a CMake function `create_target_directory_groups` which we don't intend to utilize and are removing from here. This shouldn't affect anything.
 ---
@@ -9,15 +9,18 @@ yuzu defines a CMake function `create_target_directory_groups` which we don't in
  1 file changed, 2 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 545d69c..ba0d3c1 100644
+index 525b236..0956948 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -256,5 +256,3 @@ else()
-         $<$<CXX_COMPILER_ID:Clang>:-fbracket-depth=1024>
+@@ -260,8 +260,6 @@ else()
      )
  endif()
--
+ 
 -create_target_directory_groups(shader_recompiler)
+-
+ if (YUZU_USE_PRECOMPILED_HEADERS)
+     target_precompile_headers(shader_recompiler PRIVATE precompiled_headers.h)
+ endif()
 -- 
 2.38.1
 

@@ -1,0 +1,106 @@
+From 7e49ad07464828c816fcbb9c8603e69cbdc1e26c Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Wed, 23 Nov 2022 21:30:23 +0000
+Subject: [PATCH 13/15] Align SSBOs to 0x40 bytes
+
+---
+ frontend/maxwell/translate_program.cpp          |  2 +-
+ host_translate_info.h                           |  1 +
+ ir_opt/global_memory_to_storage_buffer_pass.cpp | 14 ++++++++++----
+ ir_opt/passes.h                                 |  2 +-
+ 4 files changed, 13 insertions(+), 6 deletions(-)
+
+diff --git a/frontend/maxwell/translate_program.cpp b/frontend/maxwell/translate_program.cpp
+index 3adbd2b..ebd3a08 100644
+--- a/frontend/maxwell/translate_program.cpp
++++ b/frontend/maxwell/translate_program.cpp
+@@ -223,7 +223,7 @@ IR::Program TranslateProgram(ObjectPool<IR::Inst>& inst_pool, ObjectPool<IR::Blo
+ 
+     Optimization::PositionPass(env, program);
+ 
+-    Optimization::GlobalMemoryToStorageBufferPass(program);
++    Optimization::GlobalMemoryToStorageBufferPass(program, host_info);
+     Optimization::TexturePass(env, program, host_info);
+ 
+     if (Settings::values.resolution_info.active) {
+diff --git a/host_translate_info.h b/host_translate_info.h
+index d5d2795..7df0901 100644
+--- a/host_translate_info.h
++++ b/host_translate_info.h
+@@ -15,6 +15,7 @@ struct HostTranslateInfo {
+     bool needs_demote_reorder{}; ///< True when the device needs DemoteToHelperInvocation reordered
+     bool support_snorm_render_buffer{};  ///< True when the device supports SNORM render buffers
+     bool support_viewport_index_layer{}; ///< True when the device supports gl_Layer in VS
++    u32 min_ssbo_alignment{};  ///< Minimum alignment supported by the device for SSBOs
+ };
+ 
+ } // namespace Shader
+diff --git a/ir_opt/global_memory_to_storage_buffer_pass.cpp b/ir_opt/global_memory_to_storage_buffer_pass.cpp
+index 336338e..c0d53ee 100644
+--- a/ir_opt/global_memory_to_storage_buffer_pass.cpp
++++ b/ir_opt/global_memory_to_storage_buffer_pass.cpp
+@@ -11,6 +11,7 @@
+ #include "shader_recompiler/frontend/ir/breadth_first_search.h"
+ #include "shader_recompiler/frontend/ir/ir_emitter.h"
+ #include "shader_recompiler/frontend/ir/value.h"
++#include "shader_compiler/host_translate_info.h"
+ #include "shader_recompiler/ir_opt/passes.h"
+ 
+ namespace Shader::Optimization {
+@@ -402,7 +403,7 @@ void CollectStorageBuffers(IR::Block& block, IR::Inst& inst, StorageInfo& info)
+ }
+ 
+ /// Returns the offset in indices (not bytes) for an equivalent storage instruction
+-IR::U32 StorageOffset(IR::Block& block, IR::Inst& inst, StorageBufferAddr buffer) {
++IR::U32 StorageOffset(IR::Block& block, IR::Inst& inst, StorageBufferAddr buffer, u32 alignment) {
+     IR::IREmitter ir{block, IR::Block::InstructionList::s_iterator_to(inst)};
+     IR::U32 offset;
+     if (const std::optional<LowAddrInfo> low_addr{TrackLowAddress(&inst)}) {
+@@ -415,7 +416,12 @@ IR::U32 StorageOffset(IR::Block& block, IR::Inst& inst, StorageBufferAddr buffer
+     }
+     // Subtract the least significant 32 bits from the guest offset. The result is the storage
+     // buffer offset in bytes.
+-    const IR::U32 low_cbuf{ir.GetCbuf(ir.Imm32(buffer.index), ir.Imm32(buffer.offset))};
++    IR::U32 low_cbuf{ir.GetCbuf(ir.Imm32(buffer.index), ir.Imm32(buffer.offset))};
++
++    // Align the offset base to match the host alignment requirements if they are stricter than the maxwell required alignment
++    static constexpr u32 default_alignment{0x10};
++    if (alignment > default_alignment)
++        low_cbuf = ir.BitwiseAnd(low_cbuf, ir.Imm32(~(alignment - 1U)));
+     return ir.ISub(offset, low_cbuf);
+ }
+ 
+@@ -510,7 +516,7 @@ void Replace(IR::Block& block, IR::Inst& inst, const IR::U32& storage_index,
+ }
+ } // Anonymous namespace
+ 
+-void GlobalMemoryToStorageBufferPass(IR::Program& program) {
++void GlobalMemoryToStorageBufferPass(IR::Program& program, const HostTranslateInfo& host_info) {
+     StorageInfo info;
+     for (IR::Block* const block : program.post_order_blocks) {
+         for (IR::Inst& inst : block->Instructions()) {
+@@ -534,7 +540,7 @@ void GlobalMemoryToStorageBufferPass(IR::Program& program) {
+         const IR::U32 index{IR::Value{static_cast<u32>(info.set.index_of(it))}};
+         IR::Block* const block{storage_inst.block};
+         IR::Inst* const inst{storage_inst.inst};
+-        const IR::U32 offset{StorageOffset(*block, *inst, storage_buffer)};
++        const IR::U32 offset{StorageOffset(*block, *inst, storage_buffer, host_info.min_ssbo_alignment)};
+         Replace(*block, *inst, index, offset);
+     }
+ }
+diff --git a/ir_opt/passes.h b/ir_opt/passes.h
+index 11bfe80..9681cef 100644
+--- a/ir_opt/passes.h
++++ b/ir_opt/passes.h
+@@ -15,7 +15,7 @@ namespace Shader::Optimization {
+ void CollectShaderInfoPass(Environment& env, IR::Program& program);
+ void ConstantPropagationPass(IR::Program& program);
+ void DeadCodeEliminationPass(IR::Program& program);
+-void GlobalMemoryToStorageBufferPass(IR::Program& program);
++void GlobalMemoryToStorageBufferPass(IR::Program& program, const HostTranslateInfo& host_info);
+ void IdentityRemovalPass(IR::Program& program);
+ void LowerFp16ToFp32(IR::Program& program);
+ void LowerInt64ToInt32(IR::Program& program);
+-- 
+2.38.1
+

@@ -1,0 +1,45 @@
+From 479a74f3ab1ae93cbba45743c3bc4a3e04222853 Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Fri, 30 Dec 2022 13:45:00 +0000
+Subject: [PATCH 15/15] Fix ShuffleUp in_range checks
+
+Since ShuffleUp subtracts from delta we need to check against the min thread ID, not the max.
+---
+ backend/glsl/emit_glsl_warp.cpp   | 4 ++--
+ backend/spirv/emit_spirv_warp.cpp | 3 +--
+ 2 files changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/backend/glsl/emit_glsl_warp.cpp b/backend/glsl/emit_glsl_warp.cpp
+index 1245c94..b7af245 100644
+--- a/backend/glsl/emit_glsl_warp.cpp
++++ b/backend/glsl/emit_glsl_warp.cpp
+@@ -154,9 +154,9 @@ void EmitShuffleUp(EmitContext& ctx, IR::Inst& inst, std::string_view value, std
+     const auto is_upper_partition{"int(gl_SubGroupInvocationARB)>=32"};
+     const auto upper_clamp{fmt::format("{}?{}+32:{}", is_upper_partition, clamp, clamp)};
+ 
+-    const auto max_thread_id{GetMaxThreadId(THREAD_ID, big_warp ? upper_clamp : clamp, seg_mask)};
++    const auto min_thread_id{ComputeMinThreadId(THREAD_ID, seg_mask)};
+     const auto src_thread_id{fmt::format("({}-{})", THREAD_ID, index)};
+-    ctx.Add("shfl_in_bounds=int({})>=int({});", src_thread_id, max_thread_id);
++    ctx.Add("shfl_in_bounds=int({})>=int({});", src_thread_id, min_thread_id);
+     SetInBoundsFlag(ctx, inst);
+     ctx.AddU32("{}=shfl_in_bounds?readInvocationARB({},{}):{};", inst, value, src_thread_id, value);
+ }
+diff --git a/backend/spirv/emit_spirv_warp.cpp b/backend/spirv/emit_spirv_warp.cpp
+index 27196f6..d75586b 100644
+--- a/backend/spirv/emit_spirv_warp.cpp
++++ b/backend/spirv/emit_spirv_warp.cpp
+@@ -186,9 +186,8 @@ Id EmitShuffleUp(EmitContext& ctx, IR::Inst* inst, Id value, Id index, Id clamp,
+     if (ctx.profile.warp_size_potentially_larger_than_guest) {
+         clamp = GetUpperClamp(ctx, thread_id, clamp);
+     }
+-    const Id max_thread_id{GetMaxThreadId(ctx, thread_id, clamp, segmentation_mask)};
+     const Id src_thread_id{ctx.OpISub(ctx.U32[1], thread_id, index)};
+-    const Id in_range{ctx.OpSGreaterThanEqual(ctx.U1, src_thread_id, max_thread_id)};
++    const Id in_range{ctx.OpSGreaterThanEqual(ctx.U1, src_thread_id, ComputeMinThreadId(ctx, thread_id, segmentation_mask))};
+ 
+     SetInBoundsFlag(inst, in_range);
+     return SelectValue(ctx, in_range, value, src_thread_id);
+-- 
+2.38.1
+

@@ -1,7 +1,7 @@
-From 1eb4f5395e4d1cc88d7cb3fdfa6c8df9cb708416 Mon Sep 17 00:00:00 2001
+From ccb729705824d913dc5fbea854702c6b708adde8 Mon Sep 17 00:00:00 2001
 From: Billy Laws <blaws05@gmail.com>
 Date: Thu, 4 Aug 2022 20:21:19 +0100
-Subject: [PATCH 09/14] Workaround image arg type error
+Subject: [PATCH 09/15] Workaround image arg type error
 
 ---
  backend/spirv/emit_spirv_image.cpp | 4 ++--
