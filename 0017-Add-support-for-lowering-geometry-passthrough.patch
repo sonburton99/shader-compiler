@@ -1,0 +1,174 @@
+From 7962a812147392536f2a1d89ed6f52e72a393931 Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Sat, 31 Dec 2022 23:19:10 +0000
+Subject: [PATCH 17/17] Add support for lowering geometry passthrough
+
+Reuses most of the existing code for generating the gl_Layer passthrough.
+---
+ frontend/maxwell/translate_program.cpp | 109 ++++++++++++++++---------
+ host_translate_info.h                  |   1 +
+ 2 files changed, 70 insertions(+), 40 deletions(-)
+
+diff --git a/frontend/maxwell/translate_program.cpp b/frontend/maxwell/translate_program.cpp
+index ebd3a08..c237c99 100644
+--- a/frontend/maxwell/translate_program.cpp
++++ b/frontend/maxwell/translate_program.cpp
+@@ -171,6 +171,66 @@ std::map<IR::Attribute, IR::Attribute> GenerateLegacyToGenericMappings(
+     }
+     return mapping;
+ }
++
++void EmitGeometryPassthrough(IR::IREmitter& ir, const IR::Program& program, const Shader::VaryingState &passthrough_mask, bool passthrough_position, std::optional<IR::Attribute> passthrough_layer_attr) {
++    for (u32 i = 0; i < program.output_vertices; i++) {
++        // Assign generics from input
++        for (u32 j = 0; j < 32; j++) {
++            if (!passthrough_mask.Generic(j)) {
++                continue;
++            }
++
++            const IR::Attribute attr = IR::Attribute::Generic0X + (j * 4);
++            ir.SetAttribute(attr + 0, ir.GetAttribute(attr + 0, ir.Imm32(i)), ir.Imm32(0));
++            ir.SetAttribute(attr + 1, ir.GetAttribute(attr + 1, ir.Imm32(i)), ir.Imm32(0));
++            ir.SetAttribute(attr + 2, ir.GetAttribute(attr + 2, ir.Imm32(i)), ir.Imm32(0));
++            ir.SetAttribute(attr + 3, ir.GetAttribute(attr + 3, ir.Imm32(i)), ir.Imm32(0));
++        }
++
++        if (passthrough_position) {
++            // Assign position from input
++            const IR::Attribute attr = IR::Attribute::PositionX;
++            ir.SetAttribute(attr + 0, ir.GetAttribute(attr + 0, ir.Imm32(i)), ir.Imm32(0));
++            ir.SetAttribute(attr + 1, ir.GetAttribute(attr + 1, ir.Imm32(i)), ir.Imm32(0));
++            ir.SetAttribute(attr + 2, ir.GetAttribute(attr + 2, ir.Imm32(i)), ir.Imm32(0));
++            ir.SetAttribute(attr + 3, ir.GetAttribute(attr + 3, ir.Imm32(i)), ir.Imm32(0));
++        }
++
++        if (passthrough_layer_attr) {
++            // Assign layer
++            ir.SetAttribute(IR::Attribute::Layer, ir.GetAttribute(*passthrough_layer_attr), ir.Imm32(0));
++        }
++
++        // Emit vertex
++        ir.EmitVertex(ir.Imm32(0));
++    }
++    ir.EndPrimitive(ir.Imm32(0));
++}
++
++u32 GetOutputTopologyVertices(OutputTopology output_topology) {
++    switch (output_topology) {
++        case OutputTopology::PointList:
++            return 1;
++        case OutputTopology::LineStrip:
++            return 2;
++        default:
++            return 3;
++    }
++}
++
++void LowerGeometryPassthrough(const IR::Program& program, const HostTranslateInfo& host_info) {
++    if (program.is_geometry_passthrough) {
++        for (IR::Block *const block : program.blocks) {
++            for (IR::Inst &inst : block->Instructions()) {
++                if (inst.GetOpcode() == IR::Opcode::Epilogue) {
++                    IR::IREmitter ir{*block, IR::Block::InstructionList::s_iterator_to(inst)};
++                    EmitGeometryPassthrough(ir, program, program.info.passthrough, program.info.passthrough.AnyComponent(IR::Attribute::PositionX), {});
++                }
++            }
++        }
++    }
++}
++
+ } // Anonymous namespace
+ 
+ IR::Program TranslateProgram(ObjectPool<IR::Inst>& inst_pool, ObjectPool<IR::Block>& block_pool,
+@@ -194,6 +254,10 @@ IR::Program TranslateProgram(ObjectPool<IR::Inst>& inst_pool, ObjectPool<IR::Blo
+         program.invocations = sph.common2.threads_per_input_primitive;
+         program.is_geometry_passthrough = sph.common0.geometry_passthrough != 0;
+         if (program.is_geometry_passthrough) {
++            if (!host_info.support_geometry_passthrough) {
++                program.output_vertices = GetOutputTopologyVertices(program.output_topology);
++            }
++
+             const auto& mask{env.GpPassthroughMask()};
+             for (size_t i = 0; i < program.info.passthrough.mask.size(); ++i) {
+                 program.info.passthrough.mask[i] = ((mask[i / 32] >> (i % 32)) & 1) == 0;
+@@ -208,6 +272,8 @@ IR::Program TranslateProgram(ObjectPool<IR::Inst>& inst_pool, ObjectPool<IR::Blo
+     default:
+         break;
+     }
++    LowerGeometryPassthrough(program, host_info);
++
+     RemoveUnreachableBlocks(program);
+ 
+     // Replace instructions before the SSA rewrite
+@@ -342,17 +408,8 @@ IR::Program GenerateGeometryPassthrough(ObjectPool<IR::Inst>& inst_pool,
+     IR::Program program;
+     program.stage = Stage::Geometry;
+     program.output_topology = output_topology;
+-    switch (output_topology) {
+-    case OutputTopology::PointList:
+-        program.output_vertices = 1;
+-        break;
+-    case OutputTopology::LineStrip:
+-        program.output_vertices = 2;
+-        break;
+-    default:
+-        program.output_vertices = 3;
+-        break;
+-    }
++    program.output_vertices = GetOutputTopologyVertices(output_topology);
++
+ 
+     program.is_geometry_passthrough = false;
+     program.info.loads.mask = source_program.info.stores.mask;
+@@ -366,35 +423,7 @@ IR::Program GenerateGeometryPassthrough(ObjectPool<IR::Inst>& inst_pool,
+     node.data.block = current_block;
+ 
+     IR::IREmitter ir{*current_block};
+-    for (u32 i = 0; i < program.output_vertices; i++) {
+-        // Assign generics from input
+-        for (u32 j = 0; j < 32; j++) {
+-            if (!program.info.stores.Generic(j)) {
+-                continue;
+-            }
+-
+-            const IR::Attribute attr = IR::Attribute::Generic0X + (j * 4);
+-            ir.SetAttribute(attr + 0, ir.GetAttribute(attr + 0, ir.Imm32(i)), ir.Imm32(0));
+-            ir.SetAttribute(attr + 1, ir.GetAttribute(attr + 1, ir.Imm32(i)), ir.Imm32(0));
+-            ir.SetAttribute(attr + 2, ir.GetAttribute(attr + 2, ir.Imm32(i)), ir.Imm32(0));
+-            ir.SetAttribute(attr + 3, ir.GetAttribute(attr + 3, ir.Imm32(i)), ir.Imm32(0));
+-        }
+-
+-        // Assign position from input
+-        const IR::Attribute attr = IR::Attribute::PositionX;
+-        ir.SetAttribute(attr + 0, ir.GetAttribute(attr + 0, ir.Imm32(i)), ir.Imm32(0));
+-        ir.SetAttribute(attr + 1, ir.GetAttribute(attr + 1, ir.Imm32(i)), ir.Imm32(0));
+-        ir.SetAttribute(attr + 2, ir.GetAttribute(attr + 2, ir.Imm32(i)), ir.Imm32(0));
+-        ir.SetAttribute(attr + 3, ir.GetAttribute(attr + 3, ir.Imm32(i)), ir.Imm32(0));
+-
+-        // Assign layer
+-        ir.SetAttribute(IR::Attribute::Layer, ir.GetAttribute(source_program.info.emulated_layer),
+-                        ir.Imm32(0));
+-
+-        // Emit vertex
+-        ir.EmitVertex(ir.Imm32(0));
+-    }
+-    ir.EndPrimitive(ir.Imm32(0));
++    EmitGeometryPassthrough(ir, program, program.info.stores, true, source_program.info.emulated_layer);
+ 
+     IR::Block* return_block{block_pool.Create(inst_pool)};
+     IR::IREmitter{*return_block}.Epilogue();
+diff --git a/host_translate_info.h b/host_translate_info.h
+index 7df0901..0fc78ba 100644
+--- a/host_translate_info.h
++++ b/host_translate_info.h
+@@ -16,6 +16,7 @@ struct HostTranslateInfo {
+     bool support_snorm_render_buffer{};  ///< True when the device supports SNORM render buffers
+     bool support_viewport_index_layer{}; ///< True when the device supports gl_Layer in VS
+     u32 min_ssbo_alignment{};  ///< Minimum alignment supported by the device for SSBOs
++    bool support_geometry_passthrough{}; ///< True when the device supports geometry passthrough shaders
+ };
+ 
+ } // namespace Shader
+-- 
+2.38.1
+

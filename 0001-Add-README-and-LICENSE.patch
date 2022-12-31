@@ -1,7 +1,7 @@
-From a4a43dd07d74a1863ee080d9b103f35bc0e34963 Mon Sep 17 00:00:00 2001
+From d80502871c65df84d5631ae575e353ad0a7da95f Mon Sep 17 00:00:00 2001
 From: PixelyIon <pixelyion@protonmail.com>
 Date: Thu, 18 Nov 2021 15:42:11 +0530
-Subject: [PATCH 01/15] Add README and LICENSE
+Subject: [PATCH 01/17] Add README and LICENSE
 
 ---
  LICENSE.md | 355 +++++++++++++++++++++++++++++++++++++++++++++++++++++

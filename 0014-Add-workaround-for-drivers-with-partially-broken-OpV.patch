@@ -1,7 +1,7 @@
-From 7cbe66c19d0ce505bc234d54b2498075a719478b Mon Sep 17 00:00:00 2001
+From 569dc2ab7ca11e871d91e620f58f3054ce3d3d30 Mon Sep 17 00:00:00 2001
 From: Billy Laws <blaws05@gmail.com>
 Date: Fri, 30 Dec 2022 13:40:27 +0000
-Subject: [PATCH 14/15] Add workaround for drivers with partially-broken
+Subject: [PATCH 14/17] Add workaround for drivers with partially-broken
  OpVectorExtractDynamic
 
 ---

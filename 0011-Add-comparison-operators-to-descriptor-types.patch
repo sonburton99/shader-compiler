@@ -1,7 +1,7 @@
-From a23d8e7292894e6e536cf76adf07c16d8e4a40be Mon Sep 17 00:00:00 2001
+From b37e49a8fd4d3f631f1a114883b19e6270987bce Mon Sep 17 00:00:00 2001
 From: Billy Laws <blaws05@gmail.com>
 Date: Fri, 21 Oct 2022 22:58:37 +0100
-Subject: [PATCH 11/15] Add comparison operators to descriptor types
+Subject: [PATCH 11/17] Add comparison operators to descriptor types
 
 ---
  shader_info.h | 18 +++++++++++++++---

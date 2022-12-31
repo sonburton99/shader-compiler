@@ -1,7 +1,7 @@
-From 479a74f3ab1ae93cbba45743c3bc4a3e04222853 Mon Sep 17 00:00:00 2001
+From 5aa42176341fbd58b655b9ef2dbbe04c2a2943d5 Mon Sep 17 00:00:00 2001
 From: Billy Laws <blaws05@gmail.com>
 Date: Fri, 30 Dec 2022 13:45:00 +0000
-Subject: [PATCH 15/15] Fix ShuffleUp in_range checks
+Subject: [PATCH 15/17] Fix ShuffleUp in_range checks
 
 Since ShuffleUp subtracts from delta we need to check against the min thread ID, not the max.
 ---

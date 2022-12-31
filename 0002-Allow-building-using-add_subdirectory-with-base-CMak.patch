@@ -1,7 +1,7 @@
-From 22fbe8d34945cd1fabdb3764938a601032921c31 Mon Sep 17 00:00:00 2001
+From 0459e2987f140f18ea2af35ce8a257209c453848 Mon Sep 17 00:00:00 2001
 From: PixelyIon <pixelyion@protonmail.com>
 Date: Sat, 20 Nov 2021 12:55:51 +0530
-Subject: [PATCH 02/15] Allow building using `add_subdirectory` with base CMake
+Subject: [PATCH 02/17] Allow building using `add_subdirectory` with base CMake
 
 yuzu defines a CMake function `create_target_directory_groups` which we don't intend to utilize and are removing from here. This shouldn't affect anything.
 ---

@@ -1,7 +1,7 @@
-From fb20123ebab78ccb0a278427387d83dfef369d77 Mon Sep 17 00:00:00 2001
+From f1750e86a9eb58eef22b40f2e6c37d374ef9191d Mon Sep 17 00:00:00 2001
 From: Billy Laws <blaws05@gmail.com>
 Date: Sat, 19 Nov 2022 15:53:19 +0000
-Subject: [PATCH 12/15] Only enable int64 feature when supported
+Subject: [PATCH 12/17] Only enable int64 feature when supported
 
 ---
  backend/spirv/spirv_emit_context.cpp | 10 +++++-----

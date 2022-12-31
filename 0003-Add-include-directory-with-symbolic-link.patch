@@ -1,7 +1,7 @@
-From 978d9fe3552f5cc1bce79a01ab68927491a13dbd Mon Sep 17 00:00:00 2001
+From 3dc200a4d50fdd7ec33f5e1cce366e2b93b57465 Mon Sep 17 00:00:00 2001
 From: PixelyIon <pixelyion@protonmail.com>
 Date: Sat, 20 Nov 2021 12:58:30 +0530
-Subject: [PATCH 03/15] Add include directory with symbolic link
+Subject: [PATCH 03/17] Add include directory with symbolic link
 
 An include directory was created with the `ssc` directory that links to the repository root. This was done to make all includes local to the shader compiler so that Skyline's include folder wouldn't be filled with arbitrary headers.
 ---

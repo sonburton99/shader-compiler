@@ -1,7 +1,7 @@
-From 9eb9e566742bc7bce37a7411658ce7b743f3a623 Mon Sep 17 00:00:00 2001
+From ba4f6b9fc3e18e6e39ab553a3c33ff05a7dc5939 Mon Sep 17 00:00:00 2001
 From: PixelyIon <pixelyion@protonmail.com>
 Date: Sun, 21 Nov 2021 15:06:09 +0530
-Subject: [PATCH 06/15] Implement Skyline Proxy Settings
+Subject: [PATCH 06/17] Implement Skyline Proxy Settings
 
 Settings values are to be handled by proxy as well by Skyline code, it was determined to do things in this manner it was rather pointless to have the settings struct which has been now eliminated and been replaced with a namespace of the same name.
 ---

@@ -1,7 +1,7 @@
-From 5d229b0d3af592a165b1dbef556d973f74658592 Mon Sep 17 00:00:00 2001
+From 980bd2af2651d57dfe5d296db3efec2c84b72a67 Mon Sep 17 00:00:00 2001
 From: Billy Laws <blaws05@gmail.com>
 Date: Sun, 30 Oct 2022 19:23:59 +0000
-Subject: [PATCH 10/15] Implement emulation for {S,U}Scaled attributes
+Subject: [PATCH 10/17] Implement emulation for {S,U}Scaled attributes
 
 ---
  backend/spirv/emit_spirv_context_get_set.cpp | 43 ++++++---------

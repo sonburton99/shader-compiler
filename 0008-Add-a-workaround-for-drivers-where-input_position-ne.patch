@@ -1,7 +1,7 @@
-From f9f48f2b03a42664e96847bde38191c976fa8bbe Mon Sep 17 00:00:00 2001
+From 5742a83f4931e6b41d7ec48d5e27110241f20dc5 Mon Sep 17 00:00:00 2001
 From: Billy Laws <blaws05@gmail.com>
 Date: Tue, 2 Aug 2022 17:41:41 +0100
-Subject: [PATCH 08/15] Add a workaround for drivers where input_position needs
+Subject: [PATCH 08/17] Add a workaround for drivers where input_position needs
  to be a struct
 
 Adreno drivers will crash in geometry shaders without this.
