@@ -1,7 +1,7 @@
-From 569dc2ab7ca11e871d91e620f58f3054ce3d3d30 Mon Sep 17 00:00:00 2001
+From e0ca1442d1eedd72befbd1f456966b9f44f4a0cf Mon Sep 17 00:00:00 2001
 From: Billy Laws <blaws05@gmail.com>
 Date: Fri, 30 Dec 2022 13:40:27 +0000
-Subject: [PATCH 14/17] Add workaround for drivers with partially-broken
+Subject: [PATCH 10/14] Add workaround for drivers with partially-broken
  OpVectorExtractDynamic
 
 ---
@@ -10,7 +10,7 @@ Subject: [PATCH 14/17] Add workaround for drivers with partially-broken
  2 files changed, 18 insertions(+), 1 deletion(-)
 
 diff --git a/backend/spirv/emit_spirv_warp.cpp b/backend/spirv/emit_spirv_warp.cpp
-index 2c90f23..27196f6 100644
+index c5db19d..77ff8c5 100644
 --- a/backend/spirv/emit_spirv_warp.cpp
 +++ b/backend/spirv/emit_spirv_warp.cpp
 @@ -17,7 +17,22 @@ Id GetThreadId(EmitContext& ctx) {
@@ -38,7 +38,7 @@ index 2c90f23..27196f6 100644
  
  Id LoadMask(EmitContext& ctx, Id mask) {
 diff --git a/profile.h b/profile.h
-index c166d01..c7221c2 100644
+index b5d91a6..24fa027 100644
 --- a/profile.h
 +++ b/profile.h
 @@ -74,6 +74,8 @@ struct Profile {

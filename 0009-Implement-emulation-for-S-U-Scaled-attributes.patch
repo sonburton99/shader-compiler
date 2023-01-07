@@ -1,18 +1,18 @@
-From 980bd2af2651d57dfe5d296db3efec2c84b72a67 Mon Sep 17 00:00:00 2001
+From 5fa72ac51147b2e4b76acb4e6b110f8d7eb99020 Mon Sep 17 00:00:00 2001
 From: Billy Laws <blaws05@gmail.com>
 Date: Sun, 30 Oct 2022 19:23:59 +0000
-Subject: [PATCH 10/17] Implement emulation for {S,U}Scaled attributes
+Subject: [PATCH 09/14] Implement emulation for {S,U}Scaled attributes
 
 ---
  backend/spirv/emit_spirv_context_get_set.cpp | 43 ++++++---------
  backend/spirv/spirv_emit_context.cpp         | 55 +++++++++++++-------
  backend/spirv/spirv_emit_context.h           | 16 +++++-
- profile.h                                    |  3 ++
+ profile.h                                    |  1 +
  runtime_info.h                               |  2 +
- 5 files changed, 71 insertions(+), 48 deletions(-)
+ 5 files changed, 69 insertions(+), 48 deletions(-)
 
 diff --git a/backend/spirv/emit_spirv_context_get_set.cpp b/backend/spirv/emit_spirv_context_get_set.cpp
-index 122643b..b25d086 100644
+index 0cd87a4..8003760 100644
 --- a/backend/spirv/emit_spirv_context_get_set.cpp
 +++ b/backend/spirv/emit_spirv_context_get_set.cpp
 @@ -10,27 +10,6 @@
@@ -76,7 +76,7 @@ index 122643b..b25d086 100644
      switch (attr) {
      case IR::Attribute::PrimitiveId:
 diff --git a/backend/spirv/spirv_emit_context.cpp b/backend/spirv/spirv_emit_context.cpp
-index 7bc8741..d59b16c 100644
+index a0c155f..d357a7f 100644
 --- a/backend/spirv/spirv_emit_context.cpp
 +++ b/backend/spirv/spirv_emit_context.cpp
 @@ -25,12 +25,6 @@ enum class Operation {
@@ -169,7 +169,7 @@ index 7bc8741..d59b16c 100644
              OpReturnValue(result);
              ++label_index;
          }
-@@ -1441,7 +1456,7 @@ void EmitContext::DefineInputs(const IR::Program& program) {
+@@ -1455,7 +1470,7 @@ void EmitContext::DefineInputs(const IR::Program& program) {
          const Id id{DefineInput(*this, type, true)};
          Decorate(id, spv::Decoration::Location, static_cast<u32>(index));
          Name(id, fmt::format("in_attr{}", index));
@@ -179,7 +179,7 @@ index 7bc8741..d59b16c 100644
          if (info.passthrough.Generic(index) && profile.support_geometry_shader_passthrough) {
              Decorate(id, spv::Decoration::PassthroughNV);
 diff --git a/backend/spirv/spirv_emit_context.h b/backend/spirv/spirv_emit_context.h
-index a50df0d..564e26b 100644
+index dbc5c55..570f5ac 100644
 --- a/backend/spirv/spirv_emit_context.h
 +++ b/backend/spirv/spirv_emit_context.h
 @@ -94,6 +94,20 @@ struct StorageDefinitions {
@@ -203,7 +203,7 @@ index a50df0d..564e26b 100644
  struct GenericElementInfo {
      Id id{};
      u32 first_element{};
-@@ -281,7 +295,7 @@ public:
+@@ -282,7 +296,7 @@ public:
  
      bool need_input_position_indirect{};
      Id input_position{};
@@ -213,7 +213,7 @@ index a50df0d..564e26b 100644
      Id output_point_size{};
      Id output_position{};
 diff --git a/profile.h b/profile.h
-index b8841a5..c166d01 100644
+index 253e0d0..b5d91a6 100644
 --- a/profile.h
 +++ b/profile.h
 @@ -43,6 +43,7 @@ struct Profile {
@@ -224,15 +224,6 @@ index b8841a5..c166d01 100644
  
      bool warp_size_potentially_larger_than_guest{};
  
-@@ -61,6 +62,8 @@ struct Profile {
-     bool has_broken_signed_operations{};
-     /// Float controls break when fp16 is enabled
-     bool has_broken_fp16_float_controls{};
-+    /// When taking a variable decorated with 'Builtin Position' as input, some drivers will crash if it is not wrapped in a struct
-+    bool has_broken_spirv_position_input{};
-     /// Dynamic vec4 indexing is broken on some OpenGL drivers
-     bool has_gl_component_indexing_bug{};
-     /// The precise type qualifier is broken in the fragment stage of some drivers
 diff --git a/runtime_info.h b/runtime_info.h
 index 549b81e..3b63c24 100644
 --- a/runtime_info.h

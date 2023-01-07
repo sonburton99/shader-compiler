@@ -1,13 +1,13 @@
-From 46d7199d0baa995d2aab812344c4566f7c289cb9 Mon Sep 17 00:00:00 2001
+From 7c8090195cf0ee7eab94cf69cf726a62f88d94a7 Mon Sep 17 00:00:00 2001
 From: Billy Laws <blaws05@gmail.com>
 Date: Sat, 31 Dec 2022 23:18:52 +0000
-Subject: [PATCH 16/17] Add workaround for drivers with broken subgroup shuffle
+Subject: [PATCH 11/14] Add workaround for drivers with broken subgroup shuffle
 
 ---
- backend/spirv/emit_spirv.cpp      | 5 ++++-
- backend/spirv/emit_spirv_warp.cpp | 9 ++++++---
- profile.h                         | 2 ++
- 3 files changed, 12 insertions(+), 4 deletions(-)
+ backend/spirv/emit_spirv.cpp      |  5 ++++-
+ backend/spirv/emit_spirv_warp.cpp | 22 +++++++++++++++++++---
+ profile.h                         |  4 ++++
+ 3 files changed, 27 insertions(+), 4 deletions(-)
 
 diff --git a/backend/spirv/emit_spirv.cpp b/backend/spirv/emit_spirv.cpp
 index 0f86a80..351f859 100644
@@ -26,35 +26,51 @@ index 0f86a80..351f859 100644
              // vote ops are only used when not taking the long path
              ctx.AddCapability(spv::Capability::GroupNonUniformVote);
 diff --git a/backend/spirv/emit_spirv_warp.cpp b/backend/spirv/emit_spirv_warp.cpp
-index d75586b..d4e73de 100644
+index 77ff8c5..1522df7 100644
 --- a/backend/spirv/emit_spirv_warp.cpp
 +++ b/backend/spirv/emit_spirv_warp.cpp
-@@ -68,9 +68,12 @@ Id GetMaxThreadId(EmitContext& ctx, Id thread_id, Id clamp, Id segmentation_mask
+@@ -67,10 +67,26 @@ Id GetMaxThreadId(EmitContext& ctx, Id thread_id, Id clamp, Id segmentation_mask
+     return ComputeMaxThreadId(ctx, min_thread_id, clamp, not_seg_mask);
  }
  
++Id EmulateShuffle(EmitContext& ctx, Id value, Id src_thread_id) {
++    if (!ctx.profile.max_subgroup_size)
++        throw InvalidArgument("Max subgroup size is not supplied but using shuffle emulation");
++
++    const Id thread_id{GetThreadId(ctx)};
++    Id result{ctx.u32_zero_value};
++
++    for (u32 i = 0; i < ctx.profile.max_subgroup_size; i++) {
++        const Id read{ctx.OpGroupNonUniformBroadcast(ctx.U32[1], SubgroupScope(ctx), value, ctx.Const(i))};
++        result = ctx.OpSelect(ctx.U32[1], ctx.OpIEqual(ctx.U1, src_thread_id, ctx.Const(i)), read, result);
++    }
++
++    return result;
++}
++
  Id SelectValue(EmitContext& ctx, Id in_range, Id value, Id src_thread_id) {
 -    return ctx.OpSelect(
 -        ctx.U32[1], in_range,
 -        ctx.OpGroupNonUniformShuffle(ctx.U32[1], SubgroupScope(ctx), value, src_thread_id), value);
-+    // When shuffle is broken, attempt to use broadcast instead and hope for the best
 +    const Id shuffle_result{ctx.profile.has_broken_spirv_subgroup_shuffle ?
-+        ctx.OpGroupNonUniformBroadcast(ctx.U32[1], SubgroupScope(ctx), value,
-+                                       ctx.OpSelect(ctx.U32[1], in_range, src_thread_id, ctx.Const(0U))) :
++        EmulateShuffle(ctx, value, src_thread_id) :
 +        ctx.OpGroupNonUniformShuffle(ctx.U32[1], SubgroupScope(ctx), value,  src_thread_id)};
 +    return ctx.OpSelect(ctx.U32[1], in_range, shuffle_result, value);
  }
  
- Id GetUpperClamp(EmitContext& ctx, Id invocation_id, Id clamp) {
+ Id AddPartitionBase(EmitContext& ctx, Id thread_id) {
 diff --git a/profile.h b/profile.h
-index c7221c2..9af58bf 100644
+index 24fa027..f17e97d 100644
 --- a/profile.h
 +++ b/profile.h
-@@ -76,6 +76,8 @@ struct Profile {
+@@ -76,6 +76,10 @@ struct Profile {
      bool ignore_nan_fp_comparisons{};
      /// Some drivers have broken support for OpVectorExtractDynamic on subgroup mask inputs
      bool has_broken_spirv_subgroup_mask_vector_extract_dynamic{};
 +    /// Some drivers have broken support for OpGroupNonUniformShuffle
 +    bool has_broken_spirv_subgroup_shuffle{};
++    /// Maximum number of invocations in a subgroup, required if `has_broken_spirv_subgroup_shuffle` is true
++    u32 max_subgroup_size{};
  
      u32 gl_max_compute_smem_size{};
  };

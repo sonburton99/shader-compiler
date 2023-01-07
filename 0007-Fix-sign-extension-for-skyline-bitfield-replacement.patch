@@ -1,7 +1,7 @@
-From fd90912258f5c85fd19ac952426527be212a6f40 Mon Sep 17 00:00:00 2001
+From 168f6c76c9ed0e0d1d8d532da90cd3da33a8234c Mon Sep 17 00:00:00 2001
 From: Billy Laws <blaws05@gmail.com>
 Date: Tue, 29 Mar 2022 22:01:08 +0100
-Subject: [PATCH 07/17] Fix sign extension for skyline bitfield replacement
+Subject: [PATCH 07/14] Fix sign extension for skyline bitfield replacement
 
 ---
  common/bit_field.h | 10 +++++++++-

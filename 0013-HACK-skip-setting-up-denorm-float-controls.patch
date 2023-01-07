@@ -1,0 +1,25 @@
+From 90b5668447ffcefd0abe6f917b0051f2f46e38a6 Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Sat, 7 Jan 2023 15:07:39 +0000
+Subject: [PATCH 13/14] HACK: skip setting up denorm float controls
+
+Some games pass int values through float attributes.
+---
+ backend/spirv/emit_spirv.cpp | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/backend/spirv/emit_spirv.cpp b/backend/spirv/emit_spirv.cpp
+index 05edebe..c4d642e 100644
+--- a/backend/spirv/emit_spirv.cpp
++++ b/backend/spirv/emit_spirv.cpp
+@@ -492,7 +492,6 @@ std::vector<u32> EmitSPIRV(const Profile& profile, const RuntimeInfo& runtime_in
+     DefineEntryPoint(program, ctx, main);
+     if (profile.support_float_controls) {
+         ctx.AddExtension("SPV_KHR_float_controls");
+-        SetupDenormControl(profile, program, ctx, main);
+         SetupSignedNanCapabilities(profile, program, ctx, main);
+     }
+     SetupCapabilities(profile, program.info, ctx);
+-- 
+2.38.1
+
