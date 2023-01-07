@@ -482,8 +482,12 @@ void PatchPhiNodes(IR::Program& program, EmitContext& ctx) {
 } // Anonymous namespace
 
 std::vector<u32> EmitSPIRV(const Profile& profile, const RuntimeInfo& runtime_info,
-                           IR::Program& program, Bindings& bindings) {
+                           IR::Program& program, Bindings& bindings, std::string_view name) {
     EmitContext ctx{profile, runtime_info, program, bindings};
+    if (!name.empty()) {
+        ctx.String(name);
+    }
+
     const Id main{DefineMain(ctx, program)};
     DefineEntryPoint(program, ctx, main);
     if (profile.support_float_controls) {
