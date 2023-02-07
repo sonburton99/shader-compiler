@@ -1,0 +1,26 @@
+From 7d99a5cdcc2fbc9cbd8ac820c1bccc0fa9f5a824 Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Sun, 29 Jan 2023 22:22:08 +0000
+Subject: [PATCH 3/3] Use breadcast when subgroup shuffle is disabled
+
+Works better in some cases, no harm doing this since it's a hack either way.
+---
+ backend/spirv/emit_spirv_warp.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/backend/spirv/emit_spirv_warp.cpp b/backend/spirv/emit_spirv_warp.cpp
+index 5d8342a..7972dc1 100644
+--- a/backend/spirv/emit_spirv_warp.cpp
++++ b/backend/spirv/emit_spirv_warp.cpp
+@@ -85,7 +85,7 @@ Id EmulateShuffle(EmitContext& ctx, Id value, Id src_thread_id) {
+ Id SelectValue(EmitContext& ctx, Id in_range, Id value, Id src_thread_id) {
+     const Id shuffle_result{[&] () {
+         if (ctx.profile.disable_subgroup_shuffle)
+-            return value;
++            return ctx.OpGroupNonUniformBroadcast(ctx.U32[1], SubgroupScope(ctx), value,  src_thread_id);
+         else if (ctx.profile.has_broken_spirv_subgroup_shuffle)
+             return EmulateShuffle(ctx, value, src_thread_id);
+         else
+-- 
+2.39.0
+

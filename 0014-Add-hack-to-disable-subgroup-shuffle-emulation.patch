@@ -1,0 +1,49 @@
+From e94fd27e4d47b7ff31e7a69a6d299f24ebf91653 Mon Sep 17 00:00:00 2001
+From: Billy Laws <blaws05@gmail.com>
+Date: Mon, 23 Jan 2023 21:22:40 +0000
+Subject: [PATCH 1/3] Add hack to disable subgroup shuffle emulation
+
+---
+ backend/spirv/emit_spirv_warp.cpp | 11 ++++++++---
+ profile.h                         |  3 +++
+ 2 files changed, 11 insertions(+), 3 deletions(-)
+
+diff --git a/backend/spirv/emit_spirv_warp.cpp b/backend/spirv/emit_spirv_warp.cpp
+index 1522df7..5d8342a 100644
+--- a/backend/spirv/emit_spirv_warp.cpp
++++ b/backend/spirv/emit_spirv_warp.cpp
+@@ -83,9 +83,14 @@ Id EmulateShuffle(EmitContext& ctx, Id value, Id src_thread_id) {
+ }
+ 
+ Id SelectValue(EmitContext& ctx, Id in_range, Id value, Id src_thread_id) {
+-    const Id shuffle_result{ctx.profile.has_broken_spirv_subgroup_shuffle ?
+-        EmulateShuffle(ctx, value, src_thread_id) :
+-        ctx.OpGroupNonUniformShuffle(ctx.U32[1], SubgroupScope(ctx), value,  src_thread_id)};
++    const Id shuffle_result{[&] () {
++        if (ctx.profile.disable_subgroup_shuffle)
++            return value;
++        else if (ctx.profile.has_broken_spirv_subgroup_shuffle)
++            return EmulateShuffle(ctx, value, src_thread_id);
++        else
++            return ctx.OpGroupNonUniformShuffle(ctx.U32[1], SubgroupScope(ctx), value,  src_thread_id);
++    }()};
+     return ctx.OpSelect(ctx.U32[1], in_range, shuffle_result, value);
+ }
+ 
+diff --git a/profile.h b/profile.h
+index f17e97d..a3298e9 100644
+--- a/profile.h
++++ b/profile.h
+@@ -80,6 +80,9 @@ struct Profile {
+     bool has_broken_spirv_subgroup_shuffle{};
+     /// Maximum number of invocations in a subgroup, required if `has_broken_spirv_subgroup_shuffle` is true
+     u32 max_subgroup_size{};
++    /// HACK: Subgroup shuffle can be extremely costly to emulate on GPUs not supporting it in HW
++    bool disable_subgroup_shuffle{};
++
+ 
+     u32 gl_max_compute_smem_size{};
+ };
+-- 
+2.39.0
+
