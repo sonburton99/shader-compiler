@@ -421,7 +421,7 @@ IR::U32 StorageOffset(IR::Block& block, IR::Inst& inst, StorageBufferAddr buffer
 
     // Align the offset base to match the host alignment requirements
     low_cbuf = ir.BitwiseAnd(low_cbuf, ir.Imm32(~(alignment - 1U)));
-    return ir.ISub(offset, low_cbuf);
+    return ir.SMax(ir.ISub(offset, low_cbuf), ir.Imm32(0));
 }
 
 /// Replace a global memory load instruction with its storage buffer equivalent
