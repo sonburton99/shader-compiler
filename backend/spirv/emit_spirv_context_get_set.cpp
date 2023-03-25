@@ -118,6 +118,11 @@ Id GetCbuf(EmitContext& ctx, Id result_type, Id UniformDefinitions::*member_ptr,
     if (!binding.IsImmediate()) {
         return ctx.OpFunctionCall(result_type, indirect_func, ctx.Def(binding), buffer_offset);
     }
+
+    if (ctx.profile.has_broken_spirv_access_chain_opt && !offset.IsImmediate()) {
+        buffer_offset = ctx.OpIAdd(ctx.U32[1], buffer_offset, ctx.unoptimised_u32_zero_val);
+    }
+
     const Id cbuf{ctx.cbufs[binding.U32()].*member_ptr};
     const Id access_chain{ctx.OpAccessChain(uniform_type, cbuf, ctx.u32_zero_value, buffer_offset)};
     return ctx.OpLoad(result_type, access_chain);

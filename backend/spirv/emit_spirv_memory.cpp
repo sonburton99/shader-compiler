@@ -34,7 +34,12 @@ Id StoragePointer(EmitContext& ctx, const IR::Value& binding, const IR::Value& o
         throw NotImplementedException("Dynamic storage buffer indexing");
     }
     const Id ssbo{ctx.ssbos[binding.U32()].*member_ptr};
-    const Id index{StorageIndex(ctx, offset, element_size, index_offset)};
+    Id index{StorageIndex(ctx, offset, element_size, index_offset)};
+
+    if (ctx.profile.has_broken_spirv_access_chain_opt) {
+        index = ctx.OpIAdd(ctx.U32[1], index, ctx.unoptimised_u32_zero_val);
+    }
+
     return ctx.OpAccessChain(type_def.element, ssbo, ctx.u32_zero_value, index);
 }
 

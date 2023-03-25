@@ -276,7 +276,7 @@ void DefineConstBuffers(EmitContext& ctx, const Info& info, Id UniformDefinition
         const Id id{ctx.AddGlobalVariable(struct_pointer_type, spv::StorageClass::Uniform)};
         ctx.Decorate(id, spv::Decoration::Binding, binding);
         ctx.Decorate(id, spv::Decoration::DescriptorSet, 0U);
-        ctx.Name(id, fmt::format("c{}", desc.index));
+        ctx.Name(id, fmt::format("c{}_{}_{}", desc.index, type_char, element_size));
         for (size_t i = 0; i < desc.count; ++i) {
             ctx.cbufs[desc.index + i].*member_type = id;
         }
@@ -373,7 +373,8 @@ Id CasLoop(EmitContext& ctx, Operation operation, Id array_pointer, Id element_p
                            : ctx.TypeFunction(value_type, ctx.U32[1], value_type, array_pointer)};
 
     const Id func{ctx.OpFunction(value_type, spv::FunctionControlMask::MaskNone, func_type)};
-    const Id index{ctx.OpFunctionParameter(ctx.U32[1])};
+    Id index{ctx.OpFunctionParameter(ctx.U32[1])};
+
     const Id op_b{ctx.OpFunctionParameter(value_type)};
     const Id base{is_shared ? ctx.shared_memory_u32 : ctx.OpFunctionParameter(array_pointer)};
     ctx.AddLabel();
@@ -898,7 +899,8 @@ void EmitContext::DefineGlobalMemoryFunctions(const Info& info) {
             AddLabel(then_label);
             const Id ssbo_id{ssbos[index].*ssbo_member};
             const Id ssbo_offset{OpUConvert(U32[1], OpISub(U64, addr, ssbo_addr))};
-            const Id ssbo_index{OpShiftRightLogical(U32[1], ssbo_offset, Const(shift))};
+            Id ssbo_index{OpShiftRightLogical(U32[1], ssbo_offset, Const(shift))};
+
             const Id ssbo_pointer{OpAccessChain(element_pointer, ssbo_id, zero, ssbo_index)};
             callback(ssbo_pointer);
             AddLabel(else_label);
@@ -1071,7 +1073,7 @@ void EmitContext::DefineConstantBuffers(const Info& info, u32& binding) {
             types |= IR::Type::U32;
         }
     }
-    if (True(types & IR::Type::U32)) {
+    if (True(types & IR::Type::U32) || profile.has_broken_spirv_access_chain_opt) {
         DefineConstBuffers(*this, info, &UniformDefinitions::U32, binding, U32[1], 'u',
                            sizeof(u32));
     }

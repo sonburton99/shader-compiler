@@ -91,6 +91,22 @@ void AlphaTest(EmitContext& ctx) {
 } // Anonymous namespace
 
 void EmitPrologue(EmitContext& ctx) {
+    if (ctx.profile.has_broken_spirv_access_chain_opt) {
+        for (const auto& cbuf : ctx.cbufs) {
+            if (ValidId(cbuf.U32)) {
+                // Read first element of first bound constant buffer
+                const Id access_chain{ctx.OpAccessChain(ctx.uniform_types.U32, cbuf.U32, ctx.u32_zero_value, ctx.u32_zero_value)};
+                Id read_val{ctx.OpLoad(ctx.U32[1], access_chain)};
+
+                // Force it to zero in a way the compiler doesn't detect
+                Id val_and_1{ctx.OpBitwiseAnd(ctx.U32[1], read_val, ctx.Const(1U))};
+                Id val_and_1_minus_1{ctx.OpISub(ctx.U32[1], val_and_1, ctx.Const(1U))};
+                ctx.unoptimised_u32_zero_val = ctx.OpSelect(ctx.U32[1], ctx.OpUGreaterThan(ctx.U32[1], val_and_1, ctx.u32_zero_value), val_and_1_minus_1, val_and_1);
+                break;
+            }
+        }
+    }
+
     if (ctx.stage == Stage::VertexB) {
         const Id zero{ctx.Const(0.0f)};
         const Id one{ctx.Const(1.0f)};

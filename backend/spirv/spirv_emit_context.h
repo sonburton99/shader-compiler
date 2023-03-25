@@ -319,6 +319,8 @@ public:
     Id load_const_func_u32x2{};
     Id load_const_func_u32x4{};
 
+    Id unoptimised_u32_zero_val{};
+
 private:
     void DefineCommonTypes(const Info& info);
     void DefineCommonConstants();

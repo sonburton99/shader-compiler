@@ -15,6 +15,11 @@ Id SharedPointer(EmitContext& ctx, Id offset, u32 index_offset = 0) {
     if (index_offset > 0) {
         index = ctx.OpIAdd(ctx.U32[1], index, ctx.Const(index_offset));
     }
+
+    if (ctx.profile.has_broken_spirv_access_chain_opt) {
+        index = ctx.OpIAdd(ctx.U32[1], index, ctx.unoptimised_u32_zero_val);
+    }
+
     return ctx.profile.support_explicit_workgroup_layout
                ? ctx.OpAccessChain(ctx.shared_u32, ctx.shared_memory_u32, ctx.u32_zero_value, index)
                : ctx.OpAccessChain(ctx.shared_u32, ctx.shared_memory_u32, index);
@@ -41,7 +46,12 @@ Id StoragePointer(EmitContext& ctx, const StorageTypeDefinition& type_def,
         throw NotImplementedException("Dynamic storage buffer indexing");
     }
     const Id ssbo{ctx.ssbos[binding.U32()].*member_ptr};
-    const Id index{StorageIndex(ctx, offset, element_size)};
+    Id index{StorageIndex(ctx, offset, element_size)};
+
+    if (ctx.profile.has_broken_spirv_access_chain_opt && !offset.IsImmediate()) {
+        index = ctx.OpIAdd(ctx.U32[1], index, ctx.unoptimised_u32_zero_val);
+    }
+
     return ctx.OpAccessChain(type_def.element, ssbo, ctx.u32_zero_value, index);
 }
 
@@ -147,7 +157,11 @@ Id EmitSharedAtomicExchange32(EmitContext& ctx, Id offset, Id value) {
 Id EmitSharedAtomicExchange64(EmitContext& ctx, Id offset, Id value) {
     if (ctx.profile.support_int64_atomics && ctx.profile.support_explicit_workgroup_layout) {
         const Id shift_id{ctx.Const(3U)};
-        const Id index{ctx.OpShiftRightArithmetic(ctx.U32[1], offset, shift_id)};
+        Id index{ctx.OpShiftRightArithmetic(ctx.U32[1], offset, shift_id)};
+        if (ctx.profile.has_broken_spirv_access_chain_opt) {
+            index = ctx.OpIAdd(ctx.U32[1], index, ctx.unoptimised_u32_zero_val);
+        }
+
         const Id pointer{
             ctx.OpAccessChain(ctx.shared_u64, ctx.shared_memory_u64, ctx.u32_zero_value, index)};
         const auto [scope, semantics]{AtomicArgs(ctx)};
